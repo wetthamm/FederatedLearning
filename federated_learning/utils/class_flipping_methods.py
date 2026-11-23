@@ -422,3 +422,28 @@ def replace_2_with_7_3_with_7(targets, target_set):
             targets[idx] = 7
 
     return targets
+
+
+class LabelFlip:
+    """
+    Generic label flipping attack c_src -> c_target (paper Sec. 2.3).
+
+    FEMNIST has 62 classes, so instead of one hand-written ``replace_X_with_Y``
+    function per pair this callable object implements any pair. It has the
+    same signature as the functions above and is picklable.
+    """
+
+    def __init__(self, source_class, target_class):
+        self.source_class = int(source_class)
+        self.target_class = int(target_class)
+        self.__name__ = "replace_{}_with_{}".format(self.source_class, self.target_class)
+
+    def __call__(self, targets, target_set):
+        for idx in range(len(targets)):
+            if targets[idx] == self.source_class:
+                targets[idx] = self.target_class
+
+        return targets
+
+    def __repr__(self):
+        return self.__name__

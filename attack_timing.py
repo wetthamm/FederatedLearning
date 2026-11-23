@@ -1,24 +1,46 @@
-from federated_learning.utils import replace_0_with_2
-from federated_learning.utils import replace_5_with_3
-from federated_learning.utils import replace_1_with_9
-from federated_learning.utils import replace_4_with_6
-from federated_learning.utils import replace_1_with_3
-from federated_learning.utils import replace_6_with_0
-from federated_learning.worker_selection import BeforeBreakpoint
-from federated_learning.worker_selection import AfterBreakpoint
-from server import run_exp
+"""
+Sec. 3.3 - Attack timing (Fig. 3, 4; Table 4).
+
+  --mode early : malicious participants can only be selected before the
+                 breakpoint round (r < 75)   [original: AfterBreakpoint]
+  --mode late  : malicious participants can only be selected from the
+                 breakpoint round on (r >= 75) [original: BeforeBreakpoint]
+
+The original attack_timing.py used 25 poisoned workers (m = 50%), which is
+kept as the default here.
+
+Example:
+    python3 attack_timing.py --source 24 --target 0 --mode early late --num-exp 10 --jobs 4
+"""
+import os
+
+from experiment_cli import base_parser, num_poisoned, pair_name, run_jobs
+from federated_learning.worker_selection import AfterBreakpoint, BeforeBreakpoint
 
 if __name__ == '__main__':
-    START_EXP_IDX = 3000
-    NUM_EXP = 1
-    NUM_POISONED_WORKERS = 25
-    REPLACEMENT_METHOD = replace_1_with_9
-    KWARGS = {
-        "BeforeBreakPoint_EPOCH" : 75,
-        "BeforeBreakpoint_NUM_WORKERS_PER_ROUND" : 5,
-        "AfterBreakPoint_EPOCH" : 75,
-        "AfterBreakpoint_NUM_WORKERS_PER_ROUND" : 5,
-    }
+    parser = base_parser(__doc__)
+    parser.add_argument("--mode", nargs="+", choices=["early", "late"], default=["early", "late"])
+    parser.add_argument("--malicious-pct", type=float, default=50)
+    parser.add_argument("--breakpoint", type=int, default=75)
+    cli = parser.parse_args()
 
-    for experiment_id in range(START_EXP_IDX, START_EXP_IDX + NUM_EXP):
-        run_exp(REPLACEMENT_METHOD, NUM_POISONED_WORKERS, KWARGS, AfterBreakpoint(), experiment_id)
+    jobs = []
+    for mode in cli.mode:
+        strategy = AfterBreakpoint() if mode == "early" else BeforeBreakpoint()
+        out = os.path.join(cli.output_dir, "attack_timing", pair_name(cli), mode)
+        for experiment_id in range(cli.start_idx, cli.start_idx + cli.num_exp):
+            jobs.append(dict(
+                num_poisoned_workers=num_poisoned(cli.malicious_pct),
+                KWARGS={
+                    "BeforeBreakPoint_EPOCH": cli.breakpoint,
+                    "BeforeBreakpoint_NUM_WORKERS_PER_ROUND": cli.workers_per_round,
+                    "AfterBreakPoint_EPOCH": cli.breakpoint,
+                    "AfterBreakpoint_NUM_WORKERS_PER_ROUND": cli.workers_per_round,
+                },
+                client_selection_strategy=strategy,
+                idx=experiment_id,
+                output_dir=out,
+                extra_info={"experiment": "attack_timing", "mode": mode,
+                            "malicious_pct": cli.malicious_pct, "breakpoint": cli.breakpoint}))
+
+    run_jobs(cli, jobs)

@@ -1,20 +1,35 @@
-from federated_learning.utils import replace_0_with_2
-from federated_learning.utils import replace_5_with_3
-from federated_learning.utils import replace_1_with_9
-from federated_learning.utils import replace_4_with_6
-from federated_learning.utils import replace_1_with_3
-from federated_learning.utils import replace_6_with_0
+"""
+Sec. 3.2 - Label flipping attack feasibility (Fig. 1, 2; Tables 2, 3).
+
+Malicious participants are a random m% of the N=50 participants and every
+round selects k=5 participants uniformly at random. m=0 gives the
+non-poisoned baseline M_NP.
+
+Example (FEMNIST, one source->target pair, the paper's grid of m):
+    python3 label_flipping_attack.py --source 24 --target 0 \
+        --malicious-pct 0 2 4 10 20 30 40 50 --num-exp 10 --jobs 4
+"""
+import os
+
+from experiment_cli import base_parser, num_poisoned, pair_name, run_jobs
 from federated_learning.worker_selection import RandomSelectionStrategy
-from server import run_exp
 
 if __name__ == '__main__':
-    START_EXP_IDX = 3000
-    NUM_EXP = 3
-    NUM_POISONED_WORKERS = 0
-    REPLACEMENT_METHOD = replace_1_with_9
-    KWARGS = {
-        "NUM_WORKERS_PER_ROUND" : 5
-    }
+    parser = base_parser(__doc__)
+    parser.add_argument("--malicious-pct", type=float, nargs="+", default=[10],
+                        help="m%% values (paper: 2 4 10 20 30 40 50; 0 = no poisoning)")
+    cli = parser.parse_args()
 
-    for experiment_id in range(START_EXP_IDX, START_EXP_IDX + NUM_EXP):
-        run_exp(REPLACEMENT_METHOD, NUM_POISONED_WORKERS, KWARGS, RandomSelectionStrategy(), experiment_id)
+    jobs = []
+    for pct in cli.malicious_pct:
+        out = os.path.join(cli.output_dir, "label_flipping", pair_name(cli), "m{:g}".format(pct))
+        for experiment_id in range(cli.start_idx, cli.start_idx + cli.num_exp):
+            jobs.append(dict(
+                num_poisoned_workers=num_poisoned(pct),
+                KWARGS={"NUM_WORKERS_PER_ROUND": cli.workers_per_round},
+                client_selection_strategy=RandomSelectionStrategy(),
+                idx=experiment_id,
+                output_dir=out,
+                extra_info={"experiment": "label_flipping", "malicious_pct": pct}))
+
+    run_jobs(cli, jobs)

@@ -1,5 +1,6 @@
 from .nets import Cifar10CNN
 from .nets import FashionMNISTCNN
+from .nets import FEMNISTCNN
 from .worker_selection import BeforeBreakpoint
 from .worker_selection import AfterBreakpoint
 from .worker_selection import PoisonerProbability
@@ -7,27 +8,81 @@ import torch.nn.functional as F
 import torch
 import json
 
+import os
+
 # Setting the seed for Torch
 SEED = 1
 torch.manual_seed(SEED)
 
+# Which dataset the experiments run on. "femnist" (LEAF) is the new dataset;
+# "fashion-mnist" and "cifar10" reproduce the original paper.
+# Can be overridden with the FL_DATASET environment variable.
+DEFAULT_DATASET = os.environ.get("FL_DATASET", "femnist")
+
+# Per-dataset settings. Hyperparameters are the ones recommended in the
+# original repository's README. FEMNIST uses the paper's Fashion-MNIST CNN
+# (same 1x28x28 input) widened to 62 outputs, so it reuses the
+# Fashion-MNIST hyperparameters.
+DATASET_PROFILES = {
+    "femnist": {
+        "net": FEMNISTCNN,
+        "num_classes": 62,
+        "defense_layer_name": "fc.weight",
+        "train_data_loader_pickle_path": "data_loaders/femnist/train_data_loader.pickle",
+        "test_data_loader_pickle_path": "data_loaders/femnist/test_data_loader.pickle",
+        "batch_size": 4,
+        "lr": 0.001,
+        "momentum": 0.9,
+        "scheduler_step_size": 10,
+        "scheduler_gamma": 0.1,
+    },
+    "fashion-mnist": {
+        "net": FashionMNISTCNN,
+        "num_classes": 10,
+        "defense_layer_name": "fc.weight",
+        "train_data_loader_pickle_path": "data_loaders/fashion-mnist/train_data_loader.pickle",
+        "test_data_loader_pickle_path": "data_loaders/fashion-mnist/test_data_loader.pickle",
+        "batch_size": 4,
+        "lr": 0.001,
+        "momentum": 0.9,
+        "scheduler_step_size": 10,
+        "scheduler_gamma": 0.1,
+    },
+    "cifar10": {
+        "net": Cifar10CNN,
+        "num_classes": 10,
+        "defense_layer_name": "fc2.weight",
+        "train_data_loader_pickle_path": "data_loaders/cifar10/train_data_loader.pickle",
+        "test_data_loader_pickle_path": "data_loaders/cifar10/test_data_loader.pickle",
+        "batch_size": 10,
+        "lr": 0.01,
+        "momentum": 0.5,
+        "scheduler_step_size": 50,
+        "scheduler_gamma": 0.5,
+    },
+}
+
 class Arguments:
 
-    def __init__(self, logger):
+    def __init__(self, logger, dataset=None):
         self.logger = logger
 
-        self.batch_size = 10
+        self.dataset = dataset or DEFAULT_DATASET
+        profile = DATASET_PROFILES[self.dataset]
+
+        self.batch_size = profile["batch_size"]
         self.test_batch_size = 1000
-        self.epochs = 10
-        self.lr = 0.01
-        self.momentum = 0.5
+        # Number of FL rounds R (the code calls a round an "epoch"). Paper: 200.
+        self.epochs = 200
+        self.lr = profile["lr"]
+        self.momentum = profile["momentum"]
         self.cuda = True
         self.shuffle = False
         self.log_interval = 100
         self.kwargs = {}
 
-        self.scheduler_step_size = 50
-        self.scheduler_gamma = 0.5
+        self.scheduler_step_size = profile["scheduler_step_size"]
+        self.scheduler_gamma = profile["scheduler_gamma"]
         self.min_lr = 1e-10
 
         self.round_worker_selection_strategy = None
@@ -42,17 +97,44 @@ class Arguments:
         self.num_workers = 50
         self.num_poisoned_workers = 0
 
-        #self.net = Cifar10CNN
-        self.net = FashionMNISTCNN
+        self.net = profile["net"]
+        self.num_classes = profile["num_classes"]
+        self.defense_layer_name = profile["defense_layer_name"]
 
-        self.train_data_loader_pickle_path = "data_loaders/fashion-mnist/train_data_loader.pickle"
-        self.test_data_loader_pickle_path = "data_loaders/fashion-mnist/test_data_loader.pickle"
+        self.train_data_loader_pickle_path = profile["train_data_loader_pickle_path"]
+        self.test_data_loader_pickle_path = profile["test_data_loader_pickle_path"]
 
         self.loss_function = torch.nn.CrossEntropyLoss
 
         self.default_model_folder_path = "default_models"
 
         self.data_path = "data"
+
+        # Output of LEAF's femnist preprocess.sh (must contain train/ and test/).
+        self.leaf_femnist_path = os.environ.get("LEAF_FEMNIST_PATH", "data/leaf_femnist")
+
+        # Defense (Algorithm 1): record, for each participant update, the
+        # delta of the parameters connected to these output nodes. This
+        # replaces saving every model to disk as the original code did.
+        self.record_delta_classes = []
+
+    def get_leaf_femnist_path(self):
+        return self.leaf_femnist_path
+
+    def get_num_classes(self):
+        return self.num_classes
+
+    def get_defense_layer_name(self):
+        return self.defense_layer_name
+
+    def get_record_delta_classes(self):
+        return self.record_delta_classes
+
+    def set_record_delta_classes(self, classes):
+        self.record_delta_classes = list(classes)
+
+    def set_num_epochs(self, epochs):
+        self.epochs = epochs
 
     def get_round_worker_selection_strategy(self):
         return self.round_worker_selection_strategy
@@ -182,7 +264,8 @@ class Arguments:
         self.logger.debug("Arguments: {}", str(self))
 
     def __str__(self):
-        return "\nBatch Size: {}\n".format(self.batch_size) + \
+        return "\nDataset: {}\n".format(self.dataset) + \
+               "Batch Size: {}\n".format(self.batch_size) + \
                "Test Batch Size: {}\n".format(self.test_batch_size) + \
                "Epochs: {}\n".format(self.epochs) + \
                "Learning Rate: {}\n".format(self.lr) + \

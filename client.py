@@ -77,14 +77,11 @@ class Client:
         model = model_class()
 
         if os.path.exists(model_file_path):
-            try:
-                model.load_state_dict(torch.load(model_file_path))
-            except:
-                self.args.get_logger().warning("Couldn't load model. Attempting to map CUDA tensors to CPU to solve error.")
-
-                model.load_state_dict(torch.load(model_file_path, map_location=torch.device('cpu')))
+            model.load_state_dict(torch.load(model_file_path, map_location=torch.device('cpu')))
         else:
-            self.args.get_logger().warning("Could not find model: {}".format(model_file_path))
+            # Without the shared default model every client would start from a
+            # different random init, which silently breaks FedAvg.
+            raise FileNotFoundError("Could not find model: {}. Run generate_default_models.py first.".format(model_file_path))
 
         return model
 
@@ -164,13 +161,15 @@ class Client:
         """
         Calculates the precision for each class from a confusion matrix.
         """
-        return numpy.diagonal(confusion_mat) / numpy.sum(confusion_mat, axis=0)
+        with numpy.errstate(divide="ignore", invalid="ignore"):
+            return numpy.nan_to_num(numpy.diagonal(confusion_mat) / numpy.sum(confusion_mat, axis=0))
 
     def calculate_class_recall(self, confusion_mat):
         """
         Calculates the recall for each class from a confusion matrix.
         """
-        return numpy.diagonal(confusion_mat) / numpy.sum(confusion_mat, axis=1)
+        with numpy.errstate(divide="ignore", invalid="ignore"):
+            return numpy.nan_to_num(numpy.diagonal(confusion_mat) / numpy.sum(confusion_mat, axis=1))
 
     def test(self):
         self.net.eval()
@@ -195,15 +194,16 @@ class Client:
                 loss += self.loss_function(outputs, labels).item()
 
         accuracy = 100 * correct / total
-        confusion_mat = confusion_matrix(targets_, pred_)
+        # Fix the label set so the matrix is always num_classes x num_classes,
+        # even if a class is never predicted (likely with 62 classes).
+        confusion_mat = confusion_matrix(targets_, pred_, labels=list(range(self.args.get_num_classes())))
+        self.last_confusion_matrix = confusion_mat
 
         class_precision = self.calculate_class_precision(confusion_mat)
         class_recall = self.calculate_class_recall(confusion_mat)
 
         self.args.get_logger().debug('Test set: Accuracy: {}/{} ({:.0f}%)'.format(correct, total, accuracy))
         self.args.get_logger().debug('Test set: Loss: {}'.format(loss))
-        self.args.get_logger().debug("Classification Report:\n" + classification_report(targets_, pred_))
-        self.args.get_logger().debug("Confusion Matrix:\n" + str(confusion_mat))
         self.args.get_logger().debug("Class precision: {}".format(str(class_precision)))
         self.args.get_logger().debug("Class recall: {}".format(str(class_recall)))
 

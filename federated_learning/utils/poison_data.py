@@ -19,7 +19,10 @@ def poison_data(logger, distributed_dataset, num_workers, poisoned_worker_ids, r
     # TODO: Add support for multiple replacement methods?
     poisoned_dataset = []
 
-    class_labels = list(set(distributed_dataset[0][1]))
+    # Original: list(set(distributed_dataset[0][1])), i.e. only the classes
+    # held by worker 0. With 62 FEMNIST classes some worker may hold a class
+    # worker 0 lacks, which crashed the statistics logging below.
+    class_labels = sorted(set(int(y) for worker in distributed_dataset for y in worker[1]))
 
     logger.info("Poisoning data for workers: {}".format(str(poisoned_worker_ids)))
 
