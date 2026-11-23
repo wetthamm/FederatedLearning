@@ -122,7 +122,37 @@ values of m.
 
 ## Choosing the source → target pairs
 
-PAIRS_SECTION_PLACEHOLDER
+Following the paper, the pairs come from the misclassification counts m_cnt of the
+non-poisoned model M_NP. m_cnt(c_src, c_target) is the average number of c_src test samples
+that M_NP labels as c_target (`python3 analyze.py baseline results/label_flipping/0_to_0/m0`).
+
+**Baseline M_NP**: 10 runs, 200 rounds, final test accuracy **86.04% ± 0.09**.
+
+Most-confused pairs (mean over the 10 runs; full list in `analysis/baseline_top_confusions.csv`):
+
+| c_src → c_target | m_cnt | c_src test samples | c_src recall |
+|---|---|---|---|
+| `l` (47) → `1` (1) | 109.3 | 198 | 33.1% |
+| `O` (24) → `0` (0) | 72.3 | 299 | 75.2% |
+| `0` (0) → `O` (24) | 65.4 | 446 | 82.8% |
+| `I` (18) → `1` (1) | 31.7 | 136 | 65.1% |
+| `1` (1) → `l` (47) | 30.3 | 453 | 90.6% |
+| `S` (28) → `5` (5) | 18.7 | 262 | 91.0% |
+
+Chosen pairs (all sources have ≥ 50 test samples, and each target is the source's most
+common or second most common mistake):
+
+| Role | Pair | Labels | m_cnt | c_src recall in M_NP |
+|---|---|---|---|---|
+| frequent (**main pair**: timing, availability, defense) | `O` → `0` | 24 → 0 | 72.3 | 75.2% (n = 299) |
+| middle | `2` → `z` | 2 → 61 | 4.4 | 95.7% (n = 425) |
+| infrequent | `A` → `h` | 10 → 43 | 1.6 | 92.5% (n = 73) |
+
+The analyzer's top suggestion, `l` → `1`, was skipped. Even without an attack `l` is
+recognized correctly only 33% of the time, because `l`, `1` and `I` look almost identical
+in handwriting. That leaves little recall for an attack to destroy. `O` → `0` is the
+same kind of visually confusable pair with a usable baseline. To use other pairs, run
+`PAIRS="47:1 ..." MAIN_PAIR="47:1" ./run_all.sh`.
 
 ## Citing
 

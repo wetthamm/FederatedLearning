@@ -16,7 +16,7 @@ AVAIL_REPS=${AVAIL_REPS:-3}
 # source:target pairs (FEMNIST labels: 0-9 digits, 10-35 A-Z, 36-61 a-z).
 # Chosen from the non-poisoned baseline's misclassification counts
 # (python3 analyze.py baseline ...): frequent, middle, infrequent.
-PAIRS=${PAIRS:-"24:0 2:35 55:59"}
+PAIRS=${PAIRS:-"24:0 2:61 10:43"}   # O->0, 2->z, A->h
 # Pair used for the timing / availability / defense experiments
 # (the paper used one pair per dataset for these figures).
 MAIN_PAIR=${MAIN_PAIR:-"24:0"}
