@@ -167,6 +167,14 @@ async function icon(Comp, color = "FFFFFF") {
   takeaway(s, "With 62 small classes, accuracy can’t reveal the attack: defenses must check each class.");
   s.addNotes("About 1 minute 15. Despite wiping out most of a letter, overall accuracy drops by under 2 points, and by half a point in test 2. The cost is simply the attacked letter's share of the test set times how much of it was lost, the dashed lines. No class in FEMNIST is more than 5.4 percent of the test set, so attacking any one letter can cost at most about 5 points, and below 30 percent attackers the drop hides inside normal run-to-run variation. So on a dataset with many classes, overall accuracy cannot reveal this attack: a defense has to look at each class, or at the participants' updates. Thank you.");
 
+  // ===== 6. Backup: defense (optional, if time or asked)
+  s = pres.addSlide({ masterName: "Content" });
+  s.addText("Backup: the server can spot attackers in their updates", { placeholder: "title" });
+  await img(s, "d2_participants.png", MX, 1.35, 8.4, 4.55, "Participant average PC1 chart");
+  side(s, [["All", "attackers flagged whenever they did damage (10%+), clean runs never flagged", C.accent2], ["From 1", "‘A’ attacker caught; quiet honest ‘A’ updates make attackers stand out", P2]], 9.35, 1.5, 3.4);
+  takeaway(s, "Look only at the attacked letter’s output weights: attackers push them the opposite way.");
+  s.addNotes("Optional, only if there is time or someone asks about defenses. The server takes, from every update, just the 1,568 weights feeding the attacked letter’s output, compresses them with PCA, and averages each participant’s score over the rounds it trained. Attackers push those weights the opposite way from honest participants, so they end up at one end: each dot here is a participant, crosses are attackers. An automatic split flags every attacker whenever there are enough of them to do damage, and never flags anyone in the clean runs. It works even better for A than for O: the model already knows A well, so honest updates barely touch those weights and an attacker stands out, while for O honest participants are still busy correcting the O-versus-zero confusion.");
+
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
   console.log("wrote", OUT);

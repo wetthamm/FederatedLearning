@@ -296,12 +296,54 @@ async function icon(Comp, color = "FFFFFF") {
   });
   s.addNotes("The left column lists patterns that match what the original study described qualitatively. The right column is what our FEMNIST data adds: a threshold below which the attack does nothing, a simple rule for how much accuracy it costs, the difference between look-alike and unrelated targets, and a seed-matched test that rules out side effects.");
 
+  // D1 how the defense works
+  pres.addSection({ title: "Defense" });
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Defense" });
+  s.addText("The defense: look at each update’s ‘source letter’ weights", { placeholder: "title" });
+  const steps = [["1", "Keep only the source-class row", "From each participant’s update (new model − global model), take the 1,568 weights feeding the ‘O’ (or ‘A’) output."],
+    ["2", "Compress to 2 numbers", "Standardise, then PCA to 2 components, over all updates in rounds 10–200."],
+    ["3", "Average per participant", "Each participant trains ~19 times. Average its PC 1 scores (our rule, not the paper’s)."],
+    ["4", "Flag the odd group", "Split the 50 averages in two. If the split is clear (silhouette ≥ 0.65), exclude the smaller group."]];
+  steps.forEach(([n, head, body], i) => {
+    const y = 1.5 + i * 1.22;
+    s.addShape(pres.shapes.OVAL, { x: MX, y: y + 0.05, w: 0.55, h: 0.55, fill: { color: C.accent5 }, line: { color: C.accent5 }, objectName: "Step " + n + " circle" });
+    s.addText(n, { x: MX, y: y + 0.05, w: 0.55, h: 0.55, fontSize: 18, bold: true, color: "FFFFFF", align: "center", valign: "middle", margin: 0, isTextBox: true });
+    s.addText(head, { x: MX + 0.75, y, w: 4.1, h: 0.4, fontSize: 16, bold: true, color: C.text1, margin: 0, isTextBox: true });
+    s.addText(body, { x: MX + 0.75, y: y + 0.4, w: 4.1, h: 0.8, fontSize: 13, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+  });
+  await img(s, "d1_pca.png", 5.55, 1.4, 7.2, 5.1, "PCA scatter of source-row updates");
+  caption(s, "Each point is one update (955 per run, 1 seed). Honest = gray dots, malicious = crosses. Axes are unitless PCA scores.");
+  s.addNotes("How the defense works. A label flip only changes how a participant treats one letter, so the server looks only at the weights of that letter’s output node. Honest participants push those weights toward the letter’s features; attackers push them away. After PCA the attackers drift off to one side. With no attackers there is one round cloud. Because each participant trains about 19 times, we average its scores, which makes the separation much cleaner than looking at single updates.");
+
+  // D2 detection results
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Defense" });
+  s.addText("Every damaging attacker is flagged; ‘A’ from the very first", { placeholder: "title" });
+  await img(s, "d2_participants.png", MX, 1.45, 8.3, 4.95, "Participant average PC1 chart");
+  bullets(s, [["2", "Test 2  ‘A’ → ‘h’"], "Every attacker flagged at 2, 4, 10 and 20%, plus 1 honest participant.",
+    ["1", "Test 1  ‘O’ → ‘0’"], "All attackers flagged at 10% (+3 honest) and 20% (+0). At 2–4% the split is not clear enough, so nobody is flagged.",
+    ["", "No attackers"], "Neither clean run is flagged. Using only rounds 10–50 gives the same picture."], 9.15, 1.55, 3.6, 4.9, 14);
+  caption(s, "One dot per participant. Ranking by average PC 1 puts every attacker above every honest participant in 7 of 8 attacked runs (one honest participant outranks one attacker in the 8th).");
+  s.addNotes("This is the decision step. Each dot is a participant. In every attacked run the attackers are the most extreme, so the signal is there. The automatic rule catches every A attacker even when there is just one, and every O attacker from 10 percent. For O at 2 to 4 percent the attackers sit further out than honest participants, but the honest spread is wide enough that the rule does not trust the split. Clean runs are never flagged. The defense can also act early: rounds 10 to 50 give the same result.");
+
+  // D3 why
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Defense" });
+  s.addText("Why it works better for ‘A’: honest updates are quiet", { placeholder: "title" });
+  card(s, MX, 1.55, 3.85, 2.3, "0.084", "average size of an honest ‘O’-row update. The model still confuses ‘O’ with ‘0’, so honest participants keep correcting it.", ATTACK, "O honest");
+  card(s, MX + 4.05, 1.55, 3.85, 2.3, "0.038", "average size of an honest ‘A’-row update. ‘A’ is already learned (92% recall), so honest updates barely touch it.", P2, "A honest");
+  card(s, MX, 4.05, 3.85, 2.3, "1.2–1.7×", "attacker update vs honest, ‘O’ row. The attacker blends into a loud honest crowd.", ATTACK, "O ratio");
+  card(s, MX + 4.05, 4.05, 3.85, 2.3, "1.6–3.0×", "attacker update vs honest, ‘A’ row. Mislabeling well-known ‘A’s creates a large error, so a big update.", P2, "A ratio");
+  bullets(s, [["", "Why the attacker is visible at all"], "Honest and attacker updates point in opposite directions (cosine −0.6 to −0.97): one pulls the letter in, the other pushes it out.",
+    ["", "Why ‘O’ is harder"], "The look-alike pair makes honest ‘O’ updates large and varied, so 1–2 attackers do not stand out clearly.",
+    ["", "Does it fix the attack?"], "Every attack level that caused damage (10%+) had all its attackers flagged. Excluding them should bring recall back to the clean level. This is an estimate: we did not re-train without them."], 8.85, 1.55, 3.9, 4.95, 13);
+  caption(s, "Sizes are L2 norms over rounds 10–200, 1 seed per level. The decision rule and threshold are ours and were set after seeing the clean runs.");
+  s.addNotes("Why the defense is not equally good for both pairs. It is not how many A images attackers have. It is how loud the honest background is. For A, the model is already confident, so honest participants hardly change the A weights, and an attacker who labels confident A images as h produces a big, opposite-pointing update that is easy to see. For O, the clean model still confuses O and zero, so honest participants are constantly correcting the O weights, the honest cloud is wide, and a lone attacker is less clearly separated. The good news is that the levels that actually hurt the model are also the ones the defense catches.");
+
   // 15 limits
   pres.addSection({ title: "Limits and next steps" });
   s = pres.addSlide({ masterName: "Content", sectionTitle: "Limits and next steps" });
   s.addText("What this experiment does and does not show", { placeholder: "title" });
   const doesL = ["Measures label-flip damage across attacker shares from 2% to 50%", "Compares a look-alike pair with an unrelated pair under identical seeds", "Tracks every round and every class, not only the final accuracy", "Is reproducible: code, seeds and commands are in the repository"];
-  const doesntL = ["Generalise beyond two pairs: a third (‘2’ → ‘z’) is scripted but not run", "Have many runs: 3 per level (2 at 50%), so spreads up to ±14 pts", "Use realistic per-writer (non-IID) data or tuned hyperparameters", "Test timing-only attacks, attacker availability, or any defense"];
+  const doesntL = ["Generalise beyond two pairs: a third (‘2’ → ‘z’) is scripted but not run", "Have many runs: 3 per level (2 at 50%), so spreads up to ±14 pts", "Use realistic per-writer (non-IID) data or tuned hyperparameters", "Re-train with flagged participants removed, or test timing-only attacks"];
   [[doesL, ic.check, C.accent2, "Does"], [doesntL, ic.cross, C.accent1, "Does not"]].forEach(([items, im, col, head], k) => {
     const x = colX[k];
     s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y: 1.55, w: colW, h: 4.85, rectRadius: 0.1, fill: { color: C.background2 }, line: { color: C.background2 }, objectName: head + " card" });
@@ -316,7 +358,7 @@ async function icon(Comp, color = "FFFFFF") {
   s.addText("How the experiment can be improved", { placeholder: "title" });
   const imp = [[ic.redo, "10 runs per level", "Narrows the ±14 pt spread at 40–50%. About 100 more runs (≈10 h on this 4-CPU machine, far less on a GPU)."],
     [ic.random, "More pairs", "Run ‘2’ → ‘z’ and several others to test whether ‘the pair hardly matters at 20–40%’ holds in general."],
-    [ic.clock, "Timing and defense", "Attack only early or late rounds, and test whether a server-side detector catches the poisoned updates."],
+    [ic.clock, "Close the defense loop", "Re-train with flagged participants removed, test more seeds, and try attacks only in early or late rounds."],
     [ic.users, "Realistic non-IID data", "Give each participant one writer’s handwriting, as LEAF intends, instead of an even shuffle."],
     [ic.sliders, "Tune for FEMNIST", "Check sensitivity to learning-rate schedule and local epochs."],
     [ic.shield, "Full dataset", "Use all of FEMNIST, not LEAF’s 10% sample, so rare classes like ‘A’ have more test images."]];
@@ -335,7 +377,8 @@ async function icon(Comp, color = "FFFFFF") {
   s.addText([
     { text: "At 50% attackers: ‘O’ recall 75% → 7%, ‘A’ recall 92% → 31%, accuracy −1.9 and −0.5 pts.", options: { bullet: true, breakLine: true } },
     { text: "Look-alike or not, damage is similar at 20–40% attackers; 1–2 attackers do nothing.", options: { bullet: true, breakLine: true } },
-    { text: "On FEMNIST no single-class attack can cost more than ~5 pts of accuracy.", options: { bullet: true } },
+    { text: "On FEMNIST no single-class attack can cost more than ~5 pts of accuracy.", options: { bullet: true, breakLine: true } },
+    { text: "Checking the source letter’s weights flags every damaging attacker; ‘A’ attackers even from 1.", options: { bullet: true } },
   ], { placeholder: "body", paraSpaceAfter: 6 });
   dotGrid(s, 9.35, 2.55, 0.26, 0.11, [0,1,2,3,4,10,11,12,13,14,20,21,22,23,24,30,31,32,33,34,40,41,42,43,44], C.accent6, "Conclusion");
   s.addText([{ text: "50% malicious: ", options: { color: C.accent1, bold: true } }, { text: "accuracy −0.5 to −1.9 pts" }], { x: 9.35, y: 4.5, w: 3.6, h: 0.4, fontSize: 14, color: C.accent6, margin: 0, isTextBox: true });

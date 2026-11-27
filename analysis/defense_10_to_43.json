@@ -1,0 +1,238 @@
+{
+ "m0": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 0,
+   "participant_rule": {
+    "silhouette": 0.54,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 0,
+    "honest_flagged": 0,
+    "honest_seen": 50
+   },
+   "update_rule_silhouette": 0.573,
+   "update_rule_acted": true,
+   "update_false_pos": 142,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 1
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 0,
+   "participant_rule": {
+    "silhouette": 0.546,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 0,
+    "honest_flagged": 0,
+    "honest_seen": 48
+   },
+   "update_rule_silhouette": 0.337,
+   "update_rule_acted": false,
+   "update_false_pos": 0,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 0
+  }
+ },
+ "m10": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 113,
+   "participant_rule": {
+    "silhouette": 0.815,
+    "acted": true,
+    "malicious_caught": 5,
+    "malicious_seen": 5,
+    "honest_flagged": 1,
+    "honest_seen": 45,
+    "auc": 0.996
+   },
+   "update_rule_silhouette": 0.751,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.959,
+   "update_recall": 0.398,
+   "update_false_pos": 8,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 2.99,
+   "cosine_mean_honest_vs_malicious": -0.909,
+   "mean_norm_honest": 0.042,
+   "norm_ratio_malicious_to_honest": 1.924
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 22,
+   "participant_rule": {
+    "silhouette": 0.817,
+    "acted": true,
+    "malicious_caught": 5,
+    "malicious_seen": 5,
+    "honest_flagged": 0,
+    "honest_seen": 43,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.641,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.999,
+   "update_recall": 1.0,
+   "update_false_pos": 2,
+   "update_rule_malicious_caught": 5,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 4.3,
+   "cosine_mean_honest_vs_malicious": -0.829,
+   "mean_norm_honest": 0.0913,
+   "norm_ratio_malicious_to_honest": 1.734
+  }
+ },
+ "m2": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 20,
+   "participant_rule": {
+    "silhouette": 0.8,
+    "acted": true,
+    "malicious_caught": 1,
+    "malicious_seen": 1,
+    "honest_flagged": 1,
+    "honest_seen": 49,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.631,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.964,
+   "update_recall": 0.95,
+   "update_false_pos": 69,
+   "update_rule_malicious_caught": 1,
+   "update_rule_honest_flagged": 3,
+   "pc1_gap_in_honest_sd": 4.32,
+   "cosine_mean_honest_vs_malicious": -0.604,
+   "mean_norm_honest": 0.0379,
+   "norm_ratio_malicious_to_honest": 3.04
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 8,
+   "participant_rule": {
+    "silhouette": 0.812,
+    "acted": true,
+    "malicious_caught": 1,
+    "malicious_seen": 1,
+    "honest_flagged": 0,
+    "honest_seen": 47,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.677,
+   "update_rule_acted": true,
+   "update_auc_pc1": 1.0,
+   "update_recall": 1.0,
+   "update_false_pos": 2,
+   "update_rule_malicious_caught": 1,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 5.27,
+   "cosine_mean_honest_vs_malicious": -0.623,
+   "mean_norm_honest": 0.0852,
+   "norm_ratio_malicious_to_honest": 2.385
+  }
+ },
+ "m20": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 206,
+   "participant_rule": {
+    "silhouette": 0.803,
+    "acted": true,
+    "malicious_caught": 10,
+    "malicious_seen": 10,
+    "honest_flagged": 0,
+    "honest_seen": 40,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.702,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.978,
+   "update_recall": 0.427,
+   "update_false_pos": 5,
+   "update_rule_malicious_caught": 2,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 2.84,
+   "cosine_mean_honest_vs_malicious": -0.962,
+   "mean_norm_honest": 0.0471,
+   "norm_ratio_malicious_to_honest": 1.608
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 47,
+   "participant_rule": {
+    "silhouette": 0.794,
+    "acted": true,
+    "malicious_caught": 10,
+    "malicious_seen": 10,
+    "honest_flagged": 1,
+    "honest_seen": 38,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.646,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.999,
+   "update_recall": 1.0,
+   "update_false_pos": 7,
+   "update_rule_malicious_caught": 10,
+   "update_rule_honest_flagged": 2,
+   "pc1_gap_in_honest_sd": 4.25,
+   "cosine_mean_honest_vs_malicious": -0.926,
+   "mean_norm_honest": 0.1009,
+   "norm_ratio_malicious_to_honest": 1.33
+  }
+ },
+ "m4": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 49,
+   "participant_rule": {
+    "silhouette": 0.828,
+    "acted": true,
+    "malicious_caught": 2,
+    "malicious_seen": 2,
+    "honest_flagged": 1,
+    "honest_seen": 48,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.796,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.941,
+   "update_recall": 0.367,
+   "update_false_pos": 5,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 3.26,
+   "cosine_mean_honest_vs_malicious": -0.745,
+   "mean_norm_honest": 0.0391,
+   "norm_ratio_malicious_to_honest": 2.223
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 14,
+   "participant_rule": {
+    "silhouette": 0.8,
+    "acted": true,
+    "malicious_caught": 2,
+    "malicious_seen": 2,
+    "honest_flagged": 1,
+    "honest_seen": 46,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.651,
+   "update_rule_acted": true,
+   "update_auc_pc1": 1.0,
+   "update_recall": 1.0,
+   "update_false_pos": 3,
+   "update_rule_malicious_caught": 2,
+   "update_rule_honest_flagged": 1,
+   "pc1_gap_in_honest_sd": 4.68,
+   "cosine_mean_honest_vs_malicious": -0.751,
+   "mean_norm_honest": 0.0886,
+   "norm_ratio_malicious_to_honest": 1.985
+  }
+ }
+}

@@ -1,0 +1,238 @@
+{
+ "m0": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 0,
+   "participant_rule": {
+    "silhouette": 0.57,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 0,
+    "honest_flagged": 0,
+    "honest_seen": 50
+   },
+   "update_rule_silhouette": 0.517,
+   "update_rule_acted": true,
+   "update_false_pos": 147,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 2
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 0,
+   "participant_rule": {
+    "silhouette": 0.588,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 0,
+    "honest_flagged": 0,
+    "honest_seen": 48
+   },
+   "update_rule_silhouette": 0.348,
+   "update_rule_acted": false,
+   "update_false_pos": 0,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 0
+  }
+ },
+ "m10": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 113,
+   "participant_rule": {
+    "silhouette": 0.691,
+    "acted": true,
+    "malicious_caught": 5,
+    "malicious_seen": 5,
+    "honest_flagged": 3,
+    "honest_seen": 45,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.526,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.948,
+   "update_recall": 0.796,
+   "update_false_pos": 69,
+   "update_rule_malicious_caught": 5,
+   "update_rule_honest_flagged": 1,
+   "pc1_gap_in_honest_sd": 2.23,
+   "cosine_mean_honest_vs_malicious": -0.924,
+   "mean_norm_honest": 0.0895,
+   "norm_ratio_malicious_to_honest": 1.232
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 22,
+   "participant_rule": {
+    "silhouette": 0.719,
+    "acted": true,
+    "malicious_caught": 5,
+    "malicious_seen": 5,
+    "honest_flagged": 2,
+    "honest_seen": 43,
+    "auc": 0.963
+   },
+   "update_rule_silhouette": 0.444,
+   "update_rule_acted": false,
+   "update_auc_pc1": 0.972,
+   "update_recall": 0.0,
+   "update_false_pos": 0,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 2.46,
+   "cosine_mean_honest_vs_malicious": -0.804,
+   "mean_norm_honest": 0.1691,
+   "norm_ratio_malicious_to_honest": 1.072
+  }
+ },
+ "m2": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 20,
+   "participant_rule": {
+    "silhouette": 0.505,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 1,
+    "honest_flagged": 0,
+    "honest_seen": 49,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.527,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.946,
+   "update_recall": 0.95,
+   "update_false_pos": 127,
+   "update_rule_malicious_caught": 1,
+   "update_rule_honest_flagged": 1,
+   "pc1_gap_in_honest_sd": 2.31,
+   "cosine_mean_honest_vs_malicious": -0.593,
+   "mean_norm_honest": 0.0841,
+   "norm_ratio_malicious_to_honest": 1.724
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 8,
+   "participant_rule": {
+    "silhouette": 0.558,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 1,
+    "honest_flagged": 0,
+    "honest_seen": 47,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.375,
+   "update_rule_acted": false,
+   "update_auc_pc1": 0.989,
+   "update_recall": 0.0,
+   "update_false_pos": 0,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 2.25,
+   "cosine_mean_honest_vs_malicious": -0.54,
+   "mean_norm_honest": 0.1641,
+   "norm_ratio_malicious_to_honest": 1.262
+  }
+ },
+ "m20": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 206,
+   "participant_rule": {
+    "silhouette": 0.79,
+    "acted": true,
+    "malicious_caught": 10,
+    "malicious_seen": 10,
+    "honest_flagged": 0,
+    "honest_seen": 40,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.523,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.978,
+   "update_recall": 0.845,
+   "update_false_pos": 32,
+   "update_rule_malicious_caught": 10,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 2.59,
+   "cosine_mean_honest_vs_malicious": -0.972,
+   "mean_norm_honest": 0.0946,
+   "norm_ratio_malicious_to_honest": 1.106
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 47,
+   "participant_rule": {
+    "silhouette": 0.757,
+    "acted": true,
+    "malicious_caught": 10,
+    "malicious_seen": 10,
+    "honest_flagged": 1,
+    "honest_seen": 38,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.515,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.997,
+   "update_recall": 1.0,
+   "update_false_pos": 13,
+   "update_rule_malicious_caught": 10,
+   "update_rule_honest_flagged": 1,
+   "pc1_gap_in_honest_sd": 2.97,
+   "cosine_mean_honest_vs_malicious": -0.92,
+   "mean_norm_honest": 0.1752,
+   "norm_ratio_malicious_to_honest": 0.891
+  }
+ },
+ "m4": {
+  "R_full": {
+   "updates": 955,
+   "malicious_updates": 49,
+   "participant_rule": {
+    "silhouette": 0.536,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 2,
+    "honest_flagged": 0,
+    "honest_seen": 48,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.529,
+   "update_rule_acted": true,
+   "update_auc_pc1": 0.931,
+   "update_recall": 0.776,
+   "update_false_pos": 95,
+   "update_rule_malicious_caught": 2,
+   "update_rule_honest_flagged": 1,
+   "pc1_gap_in_honest_sd": 2.39,
+   "cosine_mean_honest_vs_malicious": -0.766,
+   "mean_norm_honest": 0.0851,
+   "norm_ratio_malicious_to_honest": 1.347
+  },
+  "R_early": {
+   "updates": 205,
+   "malicious_updates": 14,
+   "participant_rule": {
+    "silhouette": 0.521,
+    "acted": false,
+    "malicious_caught": 0,
+    "malicious_seen": 2,
+    "honest_flagged": 0,
+    "honest_seen": 46,
+    "auc": 1.0
+   },
+   "update_rule_silhouette": 0.396,
+   "update_rule_acted": false,
+   "update_auc_pc1": 0.999,
+   "update_recall": 0.0,
+   "update_false_pos": 0,
+   "update_rule_malicious_caught": 0,
+   "update_rule_honest_flagged": 0,
+   "pc1_gap_in_honest_sd": 2.93,
+   "cosine_mean_honest_vs_malicious": -0.696,
+   "mean_norm_honest": 0.1629,
+   "norm_ratio_malicious_to_honest": 1.161
+  }
+ }
+}
