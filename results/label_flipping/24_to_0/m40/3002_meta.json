@@ -1,0 +1,39 @@
+{
+  "experiment_id": 3002,
+  "dataset": "femnist",
+  "replacement_method": "replace_24_with_0",
+  "source_class": 24,
+  "target_class": 0,
+  "num_workers": 50,
+  "num_poisoned_workers": 20,
+  "poisoned_workers": [
+    0,
+    3,
+    7,
+    10,
+    12,
+    20,
+    21,
+    24,
+    25,
+    27,
+    28,
+    29,
+    34,
+    37,
+    38,
+    40,
+    46,
+    47,
+    48,
+    49
+  ],
+  "selection_strategy": "RandomSelectionStrategy",
+  "selection_kwargs": {
+    "NUM_WORKERS_PER_ROUND": 5
+  },
+  "num_rounds": 200,
+  "num_classes": 62,
+  "experiment": "label_flipping",
+  "malicious_pct": 40.0
+}

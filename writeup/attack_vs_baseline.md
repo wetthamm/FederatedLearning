@@ -66,3 +66,23 @@ python3 analyze.py feasibility results/label_flipping/24_to_0 --out analysis
 ```
 
 To match the paper's 10 repetitions, re-run the first line with `--num-exp 10`. Finished runs are skipped.
+
+## Result files in the repository
+
+The run outputs from this replication are committed under `results/` (without the
+per-run debug logs) and `analysis/`. The experiment scripts skip any run whose
+`<id>_meta.json` exists, so a fresh clone re-runs only what is missing, for example
+the third m = 50% repetition:
+
+```bash
+python3 label_flipping_attack.py --source 24 --target 0 --malicious-pct 50 --num-exp 3 --jobs 4
+```
+
+`analyze.py feasibility` needs the baseline next to the attack runs. The link is not
+committed because it is machine-specific, so recreate it:
+
+```bash
+ln -sfn "$PWD/results/label_flipping/0_to_0/m0" results/label_flipping/24_to_0/m0   # Linux / macOS / WSL
+# Windows without symlinks: copy the folder instead
+#   xcopy /E /I results\label_flipping\0_to_0\m0 results\label_flipping\24_to_0\m0
+```
