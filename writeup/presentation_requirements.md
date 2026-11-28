@@ -60,19 +60,15 @@ input; everything else is already in the deck.
    image to FEMNIST's format. A slide comparing the clean and attacked models on your own
    writing would be a strong test case. Send me the photos and I can add it.
 
-## For the 5-minute talk
+## The two decks
 
-These requirements need more than 5 slides. If the 5 minutes are your part of a longer group
-presentation, the other parts can cover the requirements. If your 5 minutes must cover them
-too, one possible set is:
-
-| Time | Slide | Requirement |
-|---|---|---|
-| 0:45 | 3 Input data (mention slide 4's split) | (1) input data |
-| 0:45 | 6 System architecture | (2) |
-| 1:00 | 23 Demo, then 24 Confidence | (1) workflow, output, confidence |
-| 1:15 | 12 Test 1 vs Test 2 (attack effect) | main result |
-| 0:45 | 26 Three models on easy, hard and our own data | (3) |
-| 0:30 | 29 What we built | (3) |
-
-Keep slides 7, 20, 25 and 30 as backup, and point to them if asked.
+* `FEMNIST_label_flipping.pptx` (31 slides) keeps everything together, including all the
+  required items above.
+* `FEMNIST_label_flipping_5slides.pptx` is the 5-minute talk for your part of the project: a
+  quick overview, then the test results and the conclusions. Speaker notes are timed to
+  about 5 minutes:
+  1. Setup: model and attack (1:00)
+  2. The attacked letter collapses at 20%+ attackers (1:15)
+  3. The model learns exactly the lie it was taught (0:45)
+  4. Overall accuracy barely moves (1:00)
+  5. What we can conclude (1:00)

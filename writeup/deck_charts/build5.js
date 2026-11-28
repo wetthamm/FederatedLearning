@@ -143,37 +143,41 @@ async function icon(Comp, color = "FFFFFF") {
   await img(s, "c4_head2head.png", MX, 1.35, 8.2, 4.55, "Recall loss by attacker share");
   side(s, [["−68 pts", "‘O’ recall at 50% attackers (75% → 7%)", C.accent1], ["−62 pts", "‘A’ recall at 50% attackers (92% → 31%)", P2]], 9.2, 1.6, 3.55);
   takeaway(s, "Look-alike or not, the damage is about the same at 20–40% attackers.");
-  s.addNotes("About 1.5 minutes. This is the main result. Each bar is how much of the attacked letter the model stops recognising. With one or two attackers out of 50, nothing measurable happens. From 20 percent the damage climbs fast, and at 50 percent the model has lost most of the attacked letter. The surprise: between 20 and 40 percent, both attacks do almost the same damage, although the model already confused O with zero 45 times more often than A with h. The attacker does not need letters that look alike. Only at the extremes do look-alikes fall further.");
+  s.addNotes("About 1 minute 15. This is the main result. Each bar is how much of the attacked letter the model stops recognising. With one or two attackers out of 50, nothing measurable happens. From 20 percent the damage climbs fast, and at 50 percent the model has lost most of the attacked letter. The surprise: between 20 and 40 percent, both attacks do almost the same damage, although the model already confused O with zero 45 times more often than A with h. The attacker does not need letters that look alike. Only at the extremes do look-alikes fall further.");
 
   // ===== 3. Where images go
   s = pres.addSlide({ masterName: "Content" });
   s.addText("The model learns exactly the lie it was taught", { placeholder: "title" });
   await img(s, "c6_where.png", MX, 1.35, W - 2 * MX, 4.55, "Where source images go");
   takeaway(s, "‘O’ images go only to ‘0’. ‘A’ images mostly go to ‘h’, and a few scatter to other letters.");
-  s.addNotes("About 1 minute. Here is where the test images of the attacked letter end up. Grey is still correct. In test 1, every O the model loses is labelled zero, nothing else: the attack is surgical. In test 2, most lost A images become h, but at high attacker shares about one in ten lands on some other letter. Forcing an unrelated label also makes A harder to recognise in general.");
+  s.addNotes("About 45 seconds. Here is where the test images of the attacked letter end up. Grey is still correct. In test 1, every O the model loses is labelled zero, nothing else: the attack is surgical. In test 2, most lost A images become h, but at high attacker shares about one in ten lands on some other letter. Forcing an unrelated label also makes A harder to recognise in general.");
 
-  // ===== 4. Rounds
-  s = pres.addSlide({ masterName: "Content" });
-  s.addText("Under attack, the model never settles", { placeholder: "title" });
-  await img(s, "c5_rounds.png", MX, 1.35, W - 2 * MX, 4.55, "Recall by round");
-  takeaway(s, "Recall swings 20–40 pts depending on whether attackers were picked that round.");
-  s.addNotes("About 45 seconds. This follows the attacked letter through all 200 rounds. Without an attack, in grey, the model learns the letter within a few dozen rounds and stays there. With attackers, it rises when only honest participants are picked and falls whenever an attacker is among the five. It never settles, and the final result depends on who happened to train last.");
-
-  // ===== 5. Why nobody notices
+  // ===== 4. Why nobody notices
   s = pres.addSlide({ masterName: "Content" });
   s.addText("Overall accuracy barely moves, so nobody notices", { placeholder: "title" });
   await img(s, "c7_accshare.png", MX, 1.35, 7.8, 4.55, "Accuracy drop vs recall loss");
   side(s, [["−1.9 pts", "accuracy at 50% attackers in test 1", C.accent1], ["−0.5 pts", "in test 2: ‘A’ is under 1% of the test set", P2]], 9.2, 1.6, 3.55);
   takeaway(s, "With 62 small classes, accuracy can’t reveal the attack: defenses must check each class.");
-  s.addNotes("About 1 minute 15. Despite wiping out most of a letter, overall accuracy drops by under 2 points, and by half a point in test 2. The cost is simply the attacked letter's share of the test set times how much of it was lost, the dashed lines. No class in FEMNIST is more than 5.4 percent of the test set, so attacking any one letter can cost at most about 5 points, and below 30 percent attackers the drop hides inside normal run-to-run variation. So on a dataset with many classes, overall accuracy cannot reveal this attack: a defense has to look at each class, or at the participants' updates. Thank you.");
+  s.addNotes("About 1 minute. Despite wiping out most of a letter, overall accuracy drops by under 2 points, and by half a point in test 2. The cost is simply the attacked letter's share of the test set times how much of it was lost, the dashed lines. No class in FEMNIST is more than 5.4 percent of the test set, so attacking any one letter can cost at most about 5 points, and below 30 percent attackers the drop hides inside normal run-to-run variation. So on a dataset with many classes, overall accuracy cannot reveal this attack: a defense has to look at each class, or at the participants' updates.");
 
-  // ===== 6. Backup: defense (optional, if time or asked)
+  // ===== 5. Conclusions
   s = pres.addSlide({ masterName: "Content" });
-  s.addText("Backup: the server can spot attackers in their updates", { placeholder: "title" });
-  await img(s, "d2_participants.png", MX, 1.35, 8.4, 4.55, "Participant average PC1 chart");
-  side(s, [["All", "attackers flagged whenever they did damage (10%+), clean runs never flagged", C.accent2], ["From 1", "‘A’ attacker caught; quiet honest ‘A’ updates make attackers stand out", P2]], 9.35, 1.5, 3.4);
-  takeaway(s, "Look only at the attacked letter’s output weights: attackers push them the opposite way.");
-  s.addNotes("Optional, only if there is time or someone asks about defenses. The server takes, from every update, just the 1,568 weights feeding the attacked letter’s output, compresses them with PCA, and averages each participant’s score over the rounds it trained. Attackers push those weights the opposite way from honest participants, so they end up at one end: each dot here is a participant, crosses are attackers. An automatic split flags every attacker whenever there are enough of them to do damage, and never flags anyone in the clean runs. It works even better for A than for O: the model already knows A well, so honest updates barely touch those weights and an attacker stands out, while for O honest participants are still busy correcting the O-versus-zero confusion.");
+  s.addText("What we can conclude", { placeholder: "title" });
+  const concl = [
+    ["Targeted", "−68 / −62", "pts of recall for the attacked letter at 50% attackers (‘O’ 75→7%, ‘A’ 92→31%). The other 60 classes only move by run-to-run noise.", C.accent1],
+    ["Needs a crowd", "20%+", "of participants before damage is clear. 1–2 attackers of 50 do nothing measurable; look-alike letters matter only at the extremes.", C.accent1],
+    ["Invisible in accuracy", "≤ 1.9 pts", "accuracy lost even at 50%. On FEMNIST no single-letter attack can cost more than ~5 pts, and the result swings with who trained last.", P2],
+    ["Detectable", "All", "damaging attackers flagged by checking the attacked letter’s output weights in each update (10%+ attackers; ‘A’ attackers from the first).", C.accent2],
+  ];
+  concl.forEach(([head, big, body, col], i) => {
+    const x = MX + (i % 2) * 6.15, y = 1.45 + Math.floor(i / 2) * 2.2, w = 5.95, h = 2.0;
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w, h, rectRadius: 0.1, fill: { color: C.background2 }, line: { color: C.background2 }, objectName: head + " card" });
+    s.addText(head, { x: x + 0.3, y: y + 0.15, w: w - 0.6, h: 0.4, fontSize: 16, bold: true, color: C.text2, margin: 0, isTextBox: true });
+    s.addText(big, { x: x + 0.3, y: y + 0.55, w: 2.4, h: 0.9, fontSize: 32, bold: true, color: col, fontFace: "+mj-lt", valign: "middle", margin: 0, isTextBox: true });
+    s.addText(body, { x: x + 2.75, y: y + 0.5, w: w - 3.0, h: 1.4, fontSize: 13.5, color: C.text1, valign: "middle", margin: 0, isTextBox: true });
+  });
+  takeaway(s, "Watching accuracy is not enough: check each class, or each participant’s updates.");
+  s.addNotes("About 1 minute. Four conclusions from our tests. First, the attack is targeted: at 50 percent attackers the model loses most of the attacked letter, and nothing else changes beyond normal noise. Second, it needs a crowd: one or two attackers out of fifty did nothing measurable, and the damage only becomes clear from 20 percent; whether the letters look alike only matters at the extremes. Third, it is invisible in accuracy: under 2 points even at 50 percent, and on a 62-class dataset like FEMNIST it can never cost more than about 5. The final result also depends on whether an attacker happened to train in the last round. Fourth, it is detectable: if the server looks only at the attacked letter's output weights in each update, attackers push them the opposite way from honest participants, and we flagged every attacker whenever there were enough to do damage. So the lesson: accuracy alone will not catch this; the server has to look per class, or at the updates themselves. Thank you.");
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
