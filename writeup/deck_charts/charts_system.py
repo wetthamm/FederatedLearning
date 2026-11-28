@@ -65,19 +65,21 @@ if "--models" in sys.argv:
             ax.spines["bottom"].set_visible(False)
             if r==0: ax.set_title(n,fontsize=14,color=INK,loc="left")
     fig.tight_layout(); save(fig,"e3_confidence")
-    # e4 comparison accuracy by test set
+    # e4 comparison: accuracy, confidence, attacked-letter recall
     R=json.load(open("analysis/model_comparison.json"))
     sets=["FEMNIST easy","FEMNIST hard","Fonts (ours)"]
-    fig,axs=plt.subplots(1,2,figsize=(12.6,4.6))
-    w=0.26; x=np.arange(3)
+    fig,axs=plt.subplots(1,3,figsize=(15.5,4.8),gridspec_kw={"width_ratios":[3,3,4]})
+    w=0.26
+    groups=[("‘O’\nFEMNIST","FEMNIST hard","O->0"),("‘O’\nfonts","Fonts (ours)","O->0"),("‘A’\nFEMNIST","FEMNIST easy","A->h"),("‘A’\nfonts","Fonts (ours)","A->h")]
     for k,(n,_,c) in enumerate(M):
         mk=list(R.keys())[k]
         acc=[R[mk][s]["accuracy"]*100 for s in sets]; conf=[R[mk][s]["top1_conf_mean"]*100 for s in sets]
-        for ax,v in ((axs[0],acc),(axs[1],conf)):
-            b=ax.bar(x+(k-1)*w,v,w*0.92,color=c,label=n)
-            for xx,vv in zip(x+(k-1)*w,v): ax.text(xx,vv+1,f"{vv:.0f}",ha="center",fontsize=11)
-    for ax,t in ((axs[0],"Top-1 accuracy (%)"),(axs[1],"Mean top-1 confidence (%)")):
-        ax.set_xticks(x,sets); ax.set_ylim(0,105); ax.set_title(t,loc="left",fontsize=15); ax.tick_params(axis="x",length=0)
-    axs[0].legend(loc="upper center",bbox_to_anchor=(1.08,-0.1),ncol=3,fontsize=13)
-    save(fig,"e4_comparison")
+        rec=[R[mk][st][pr]["recall"]*100 for _,st,pr in groups]
+        for ax,v,x in ((axs[0],acc,np.arange(3)),(axs[1],conf,np.arange(3)),(axs[2],rec,np.arange(4))):
+            ax.bar(x+(k-1)*w,v,w*0.92,color=c,label=n)
+            for xx,vv in zip(x+(k-1)*w,v): ax.text(xx,vv+1.2,f"{vv:.0f}",ha="center",fontsize=11)
+    for ax,t,lab in ((axs[0],"Top-1 accuracy (%)",["FEMNIST\neasy","FEMNIST\nhard","Fonts\n(ours)"]),(axs[1],"Mean top-1 confidence (%)",["FEMNIST\neasy","FEMNIST\nhard","Fonts\n(ours)"]),(axs[2],"Recall of the attacked letter (%)",[g[0] for g in groups])):
+        ax.set_xticks(range(len(lab)),lab,fontsize=13); ax.set_ylim(0,105); ax.set_title(t,loc="left",fontsize=15); ax.tick_params(axis="x",length=0)
+    axs[1].legend(loc="upper center",bbox_to_anchor=(0.5,-0.2),ncol=3,fontsize=13)
+    fig.tight_layout(w_pad=2); save(fig,"e4_comparison")
 print("ok")

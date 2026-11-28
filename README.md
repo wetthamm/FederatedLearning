@@ -120,6 +120,27 @@ machine). A GPU cuts this a lot: clients use `cuda:0` automatically when it is a
 To get every table and figure from a cheaper grid, lower the repetitions (`REPS=3`) and the
 values of m.
 
+## Demo, extra test sets and model comparison
+
+```bash
+# train and keep the final global model (clean run and two attacked runs, seed 3000)
+python3 label_flipping_attack.py --source 0  --target 0  --malicious-pct 0  --num-exp 1 --save-final-model --output-dir results_models
+python3 label_flipping_attack.py --source 24 --target 0  --malicious-pct 50 --num-exp 1 --save-final-model --output-dir results_models
+python3 label_flipping_attack.py --source 10 --target 43 --malicious-pct 50 --num-exp 1 --save-final-model --output-dir results_models
+
+# top-1 and remaining-class confidence for one image, a class, or your own photo
+python3 demo.py --model results_models/label_flipping/0_to_0/m0/3000_final_model.pt --index 3196
+python3 demo.py --model results_models/label_flipping/0_to_0/m0/3000_final_model.pt --image my_letter.png
+python3 demo.py --model results_models/label_flipping/0_to_0/m0/3000_final_model.pt --benchmark
+
+# FEMNIST easy/hard split and our font-rendered test set, then compare the three models
+python3 tools/make_test_sets.py --out data/extra_test_sets
+python3 compare_models.py --out analysis/model_comparison.json
+```
+
+The three final models are committed under `results_models/`. They match the corresponding
+runs in `results/` exactly, because runs are seeded by their id.
+
 ## Choosing the source → target pairs
 
 Following the paper, the pairs come from the misclassification counts m_cnt of the

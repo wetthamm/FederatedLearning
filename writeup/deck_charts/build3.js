@@ -131,6 +131,36 @@ async function icon(Comp, color = "FFFFFF") {
     { x: MX + 1.3, y: 5.15, w: W - 2 * MX - 1.6, h: 1.05, fontSize: 16, color: C.text1, valign: "middle", margin: 0, isTextBox: true });
   s.addNotes("Each round the server picks 5 of 50 participants; they train locally and the server averages their models. Malicious participants train on deliberately wrong labels for one class. Nothing else about them is unusual, and the server never sees their data.");
 
+  // NEW Input data
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Setup" });
+  s.addText("Input data: LEAF FEMNIST, 62 classes of handwriting", { placeholder: "title" });
+  await img(s, "e1_class_counts.png", MX, 1.4, 8.4, 3.0, "Training images per class");
+  const facts = [["Source", "NIST Special Database 19, via the LEAF benchmark’s FEMNIST script (links on the acknowledgements slide)"],
+    ["Sample", "LEAF’s 10% writer sample: 378 writers, 81,766 images"],
+    ["One sample", "28 × 28 grayscale pixels (784 values, 1.0 = white) + a label 0–61 (0–9, A–Z, a–z)"],
+    ["Format", "JSON files grouped by writer; we pool all writers, then split IID"]];
+  facts.forEach(([k, v], i) => {
+    const y = 1.5 + i * 1.12;
+    s.addText(k, { x: 9.3, y, w: 3.45, h: 0.35, fontSize: 14, bold: true, color: C.accent5, margin: 0, isTextBox: true });
+    s.addText(v, { x: 9.3, y: y + 0.35, w: 3.45, h: 0.75, fontSize: 13, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+  });
+  const hdrA = (t) => ({ text: t, options: { bold: true, color: C.background1, fill: { color: C.text1 } } });
+  s.addTable([[hdrA("Images per class"), hdrA("Train (min–max)"), hdrA("Test (min–max)")],
+    ["Digits 0–9", "3,338–3,993", "376–453"], ["Uppercase A–Z", "258–2,629", "26–299"], ["Lowercase a–z", "208–2,465", "18–307"]],
+    { x: MX, y: 4.6, w: 8.4, colW: [2.8, 2.8, 2.8], fontSize: 13, color: C.text1, border: { type: "solid", pt: 0.75, color: "DDE2EA" }, fill: { color: C.background1 }, rowH: 0.36, margin: [0.03, 0.1, 0.03, 0.1], objectName: "Per-class counts table" });
+  caption(s, "Bars: training images per class. Our attacked classes in color: ‘O’→‘0’ orange, ‘A’→‘h’ blue. Test counts are about 10% of each bar.");
+  s.addNotes("Our input data is FEMNIST from the LEAF federated-learning benchmark, built from NIST Special Database 19. We use LEAF's standard 10 percent sample: 378 writers and about 82 thousand images. Each sample is a 28 by 28 grayscale image and one of 62 labels. The classes are very unbalanced: digits have about 3,600 training images each, some lowercase letters only about 200.");
+
+  // NEW Training examples and split
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Setup" });
+  s.addText("Training examples and the train : test split", { placeholder: "title" });
+  await img(s, "e2_train_examples.png", MX, 1.45, W - 2 * MX, 1.75, "Ten training examples");
+  card(s, MX, 3.55, 3.8, 2.75, "90 : 10", "train : test ratio (73,425 : 8,341). LEAF splits each writer’s images 90/10, so every writer appears in both.", C.accent5, "Split");
+  card(s, MX + 4.0, 3.55, 3.8, 2.75, "≈1,468", "training images per participant: the 73,425 are shuffled and dealt evenly to 50 participants (IID).", C.accent2, "Per participant");
+  card(s, MX + 8.0, 3.55, 4.13, 2.75, "53 vs 13", "‘O’ vs ‘A’ images per participant: what one attacker can relabel (2,629 and 644 in total).", C.accent1, "Source images");
+  caption(s, "Ten real training images, label and class index above each. Note the look-alikes: ‘0’/‘O’, ‘1’/‘l’, ‘5’/‘S’.");
+  s.addNotes("Here are ten real training images with their labels. Characters are small and written by many different people, and several classes look alike. LEAF splits each writer's images 90 to 10 into train and test. We then shuffle the training images and give each of the 50 participants an equal share, about 1,468 images.");
+
   // 3 Params
   s = pres.addSlide({ masterName: "Content", sectionTitle: "Setup" });
   s.addText("Model and training parameters", { placeholder: "title" });
@@ -147,6 +177,56 @@ async function icon(Comp, color = "FFFFFF") {
   });
   caption(s, "Settings follow the original study’s Fashion-MNIST configuration; not re-tuned for FEMNIST.");
   s.addNotes("The model and settings are fixed across every run, so the only thing that changes between runs is the attack and the random seed.");
+
+  // NEW Architecture
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Setup" });
+  s.addText("System architecture", { placeholder: "title" });
+  const KIND = { os: [C.accent5, C.background1], mod: [C.accent4, C.text1], ours: [C.accent1, C.background1] };
+  const box = (x, y, w, h, head, sub, kind, name) => {
+    const [fill, col] = KIND[kind];
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w, h, rectRadius: 0.08, fill: { color: fill }, line: { color: fill }, objectName: name });
+    s.addText([{ text: head, options: { bold: true, fontSize: 13.5, breakLine: true } }, { text: sub, options: { fontSize: 11 } }], { x: x + 0.12, y, w: w - 0.24, h, color: col, valign: "middle", margin: 0, isTextBox: true });
+  };
+  const lanes = [["1  Data", [["NIST SD19", "raw scans, 3,550 writers", "os"], ["LEAF preprocess.sh", "10% writers, 90/10 split, 28×28", "os"], ["femnist.py loader", "JSON → tensors, 62 classes", "ours"], ["IID split", "50 participants × ~1,468 images", "os"]]],
+    ["2  Federated training", [["LabelFlip on m%", "‘O’→‘0’ or ‘A’→‘h’, m = 0–50%", "ours"], ["Local training", "5 of 50 per round, SGD, 1 epoch, batch 4", "mod"], ["FedAvg server", "average of the 5 models", "os"], ["Global model", "FEMNISTCNN, 62 outputs", "ours"]]],
+    ["3  Analysis & outputs", [["Per-round evaluation", "accuracy, per-class recall, confusion", "mod"], ["analyze.py", "pair choice, tables, charts", "ours"], ["UpdateRecorder + defense_eval", "source-row θΔ → PCA → flag", "ours"], ["demo.py, compare_models", "confidence, latency, test sets", "ours"]]]];
+  const lx = MX, bx0 = MX + 1.55, bw2 = 2.42, gap = 0.22, bh = 1.0;
+  lanes.forEach(([lane, boxes], r) => {
+    const y = 1.5 + r * 1.42;
+    s.addText(lane, { x: lx, y, w: 1.45, h: bh, fontSize: 14, bold: true, color: C.text1, valign: "middle", margin: 0, isTextBox: true });
+    boxes.forEach(([h1, h2, k], i) => {
+      const x = bx0 + i * (bw2 + gap);
+      box(x, y, bw2, bh, h1, h2, k, lane + " " + h1);
+      if (i < 3 && r < 2) s.addShape(pres.shapes.RIGHT_ARROW, { x: x + bw2 + 0.02, y: y + bh / 2 - 0.1, w: gap - 0.04, h: 0.2, fill: { color: C.accent3 }, line: { color: C.accent3 }, objectName: "Arrow " + r + i });
+    });
+    if (r < 2) s.addShape(pres.shapes.DOWN_ARROW, { x: bx0 + 3 * (bw2 + gap) + bw2 / 2 - 0.15, y: y + bh + 0.06, w: 0.3, h: 0.3, fill: { color: C.accent3 }, line: { color: C.accent3 }, objectName: "Lane arrow " + r });
+  });
+  s.addText("↻ 200 rounds", { x: bx0 + 1 * (bw2 + gap), y: 1.5 + 1.42 + bh + 0.03, w: 4.0, h: 0.3, fontSize: 12, color: C.text2, margin: 0, isTextBox: true });
+  [["os", "Open source, used as is (LEAF, DataPoisoning_FL)"], ["mod", "Open source, modified by us"], ["ours", "Written by us"]].forEach(([k, t], i) => {
+    const x = MX + i * 4.1;
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y: 5.85, w: 0.32, h: 0.32, rectRadius: 0.05, fill: { color: KIND[k][0] }, line: { color: KIND[k][0] }, objectName: "Legend " + k });
+    s.addText(t, { x: x + 0.45, y: 5.8, w: 3.6, h: 0.42, fontSize: 13, color: C.text1, valign: "middle", margin: 0, isTextBox: true });
+  });
+  caption(s, "No pre-trained models: every run starts from the same randomly initialised CNN (seed 1) and is trained from scratch.");
+  s.addNotes("This is how the pieces fit. Lane one prepares the data: LEAF turns the NIST scans into JSON, our loader reads it, and the original code deals it evenly to 50 participants. Lane two is federated training: our label-flip attack relabels the source letter for the malicious share, the selected participants train locally, and the server averages. That loop runs 200 times. Lane three is everything that reads a run: evaluation every round, our analysis scripts, the update recorder and defense, and the demo and model comparison. Orange boxes are ours, yellow are modified, blue are used as is.");
+
+  // NEW Code walkthrough 1
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Setup" });
+  s.addText("Code walkthrough: the attack and the update recorder", { placeholder: "title" });
+  const code = (x, y, w, h, file, text, name) => {
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w, h, rectRadius: 0.08, fill: { color: C.text1 }, line: { color: C.text1 }, objectName: name });
+    s.addText(file, { x: x + 0.2, y: y + 0.1, w: w - 0.4, h: 0.32, fontSize: 11, color: C.accent6, fontFace: "Consolas", margin: 0, isTextBox: true });
+    s.addText(text, { x: x + 0.2, y: y + 0.45, w: w - 0.4, h: h - 0.55, fontSize: 11, color: "F3F5F8", fontFace: "Consolas", valign: "top", margin: 0, isTextBox: true });
+  };
+  code(MX, 1.5, 5.2, 2.55, "federated_learning/utils/class_flipping_methods.py",
+    "class LabelFlip:\n    def __init__(self, source_class, target_class):\n        self.source_class = int(source_class)\n        self.target_class = int(target_class)\n\n    def __call__(self, targets, target_set):\n        for idx in range(len(targets)):\n            if targets[idx] == self.source_class:\n                targets[idx] = self.target_class\n        return targets", "LabelFlip code");
+  code(MX + 5.4, 1.5, 6.73, 3.55, "server.py  (UpdateRecorder, called every round)",
+    "def start_round(self, global_params):\n    # theta_(r-1), source-class rows of fc.weight only\n    W = global_params[self.layer_name]\n    self.global_rows = W[self.classes].clone()\n\ndef record(self, epoch, worker, local_params):\n    local = local_params[self.layer_name][self.classes]\n    self.rounds.append(epoch); self.workers.append(worker)\n    self.deltas.append((local - self.global_rows).numpy())\n\n# in train_subset_of_clients(), every round:\nrecorder.start_round(clients[0].get_nn_parameters())\nfor i in random_workers:\n    clients[i].train(epoch)\n    recorder.record(epoch, i, clients[i].get_nn_parameters())", "Recorder code");
+  bullets(s, [["", "Attack: one class for any of 62"], "The original code had one hand-written function per digit pair. LabelFlip handles any source → target pair and can be sent to parallel worker processes.",
+    ["", "Recorder: 900 MB → 5 MB per run"], "The original saved every participant’s full model to disk and rebuilt the updates afterwards. We record only the 1,568 weights the defense needs, while training runs."], MX, 4.25, 5.2, 2.2, 13);
+  s.addText("Seeded by the run id: attacked and clean runs share data splits and participant picks, so every difference is the attack’s.", { x: MX + 5.4, y: 5.25, w: 6.73, h: 0.9, fontSize: 13, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+  caption(s, "Excerpts, lightly shortened. Full files in the repository.");
+  s.addNotes("Two pieces of code I am proud of. On the left, the attack: a small callable class that flips any source label to any target, replacing dozens of hard-coded functions from the original code. On the right, the update recorder: at the start of each round it remembers the global weights of the source letter's output node, and after each participant trains it stores the difference. That is exactly the input the defense needs, and it cut storage from about 900 megabytes per run to 5.");
 
   // 4 Test design
   s = pres.addSlide({ masterName: "Content", sectionTitle: "Setup" });
@@ -315,6 +395,27 @@ async function icon(Comp, color = "FFFFFF") {
   caption(s, "Each point is one update (955 per run, 1 seed). Honest = gray dots, malicious = crosses. Axes are unitless PCA scores.");
   s.addNotes("How the defense works. A label flip only changes how a participant treats one letter, so the server looks only at the weights of that letter’s output node. Honest participants push those weights toward the letter’s features; attackers push them away. After PCA the attackers drift off to one side. With no attackers there is one round cloud. Because each participant trains about 19 times, we average its scores, which makes the separation much cleaner than looking at single updates.");
 
+  // NEW Code walkthrough 2
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Defense" });
+  s.addText("Code walkthrough: from updates to a flagged participant", { placeholder: "title" });
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: MX, y: 1.5, w: 7.3, h: 4.85, rectRadius: 0.08, fill: { color: C.text1 }, line: { color: C.text1 }, objectName: "Defense code" });
+  s.addText("defense_eval.py", { x: MX + 0.2, y: 1.6, w: 6.9, h: 0.32, fontSize: 11, color: C.accent6, fontFace: "Consolas", margin: 0, isTextBox: true });
+  s.addText("# X: one row per update (1,568 source-row weights)\npts = PCA(n_components=2).fit_transform(\n          StandardScaler().fit_transform(X))\npc1 = pts[:, 0]\n\ndef participant_rule(pc1, poisoned, workers, min_sil=0.65):\n    wset = sorted(set(workers.tolist()))\n    # average each participant over all rounds it trained\n    avg = numpy.array([pc1[workers == w].mean()\n                       for w in wset]).reshape(-1, 1)\n    lab = KMeans(n_clusters=2, n_init=10,\n                 random_state=0).fit(avg).labels_\n    sil = silhouette_score(avg, lab)\n    act = sil >= min_sil           # only act on a clear split\n    small = numpy.argmin(numpy.bincount(lab))\n    flagged = (lab == small) & act  # smaller group = suspects\n    # 'poisoned' is used only to score the result",
+    { x: MX + 0.2, y: 1.95, w: 6.9, h: 4.3, fontSize: 11.5, color: "F3F5F8", fontFace: "Consolas", valign: "top", margin: 0, isTextBox: true });
+  const ann = [["1", "Standardise + PCA", "the paper’s Algorithm 1: 955 updates → 2 numbers each"],
+    ["2", "Average per participant", "our addition. It cancels the 6–12× size drift between early and late rounds"],
+    ["3", "Split in two, check clarity", "silhouette ≥ 0.65, so clean runs (0.54–0.59) flag nobody"],
+    ["4", "Flag the smaller group", "attackers are assumed to be a minority"]];
+  ann.forEach(([n, h1, b], i) => {
+    const y = 1.55 + i * 1.18;
+    s.addShape(pres.shapes.OVAL, { x: 8.2, y: y + 0.05, w: 0.5, h: 0.5, fill: { color: C.accent1 }, line: { color: C.accent1 }, objectName: "Annotation " + n });
+    s.addText(n, { x: 8.2, y: y + 0.05, w: 0.5, h: 0.5, fontSize: 16, bold: true, color: "FFFFFF", align: "center", valign: "middle", margin: 0, isTextBox: true });
+    s.addText(h1, { x: 8.9, y, w: 3.85, h: 0.38, fontSize: 15, bold: true, color: C.text1, margin: 0, isTextBox: true });
+    s.addText(b, { x: 8.9, y: y + 0.38, w: 3.85, h: 0.75, fontSize: 13, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+  });
+  caption(s, "Our first version clustered the 955 single updates instead (step 2 skipped). It split early from late rounds and flagged 147 updates in a clean run.");
+  s.addNotes("This is the defense's decision step. Lines one to four are the paper's algorithm: standardise the source-row updates and project them onto two principal components. The participant rule is ours. Averaging each participant over all its rounds removes the large size difference between early and late updates, which fooled our first attempt. We split the averages in two and only act if the split is clear; the smaller group is flagged. The true labels are used only to score the result, never to decide.");
+
   // D2 detection results
   s = pres.addSlide({ masterName: "Content", sectionTitle: "Defense" });
   s.addText("Every damaging attacker is flagged; ‘A’ from the very first", { placeholder: "title" });
@@ -337,6 +438,55 @@ async function icon(Comp, color = "FFFFFF") {
     ["", "Does it fix the attack?"], "Every attack level that caused damage (10%+) had all its attackers flagged. Excluding them should bring recall back to the clean level. This is an estimate: we did not re-train without them."], 8.85, 1.55, 3.9, 4.95, 13);
   caption(s, "Sizes are L2 norms over rounds 10–200, 1 seed per level. The decision rule and threshold are ours and were set after seeing the clean runs.");
   s.addNotes("Why the defense is not equally good for both pairs. It is not how many A images attackers have. It is how loud the honest background is. For A, the model is already confident, so honest participants hardly change the A weights, and an attacker who labels confident A images as h produces a big, opposite-pointing update that is easy to see. For O, the clean model still confuses O and zero, so honest participants are constantly correcting the O weights, the honest cloud is wide, and a lone attacker is less clearly separated. The good news is that the levels that actually hurt the model are also the ones the defense catches.");
+
+  // NEW Demo section
+  pres.addSection({ title: "Demo and outputs" });
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Demo and outputs" });
+  s.addText("Demo: one experiment, from input to output", { placeholder: "title" });
+  await img(s, "term_run.png", MX, 1.4, W - 2 * MX, 3.6, "Console output of a 3-round run");
+  [["Input", "FEMNIST data loaders + the attack settings: source ‘O’ (24) → target ‘0’, 10% malicious", C.accent5],
+   ["Processing", "5 participants poisoned; each round 5 of 50 train locally, then FedAvg. Here 3 rounds instead of 200", C.accent1],
+   ["Output", "accuracy every round, plus per-run files: per-class results, confusion matrix, participant picks, settings", C.accent2]].forEach(([h1, b, col], i) => {
+    const x = MX + i * 4.1;
+    s.addShape(pres.shapes.RECTANGLE, { x, y: 5.2, w: 0.08, h: 1.1, fill: { color: col }, line: { color: col }, objectName: h1 + " bar" });
+    s.addText([{ text: h1, options: { bold: true, fontSize: 16, color: col, breakLine: true } }, { text: b, options: { fontSize: 13 } }], { x: x + 0.22, y: 5.15, w: 3.75, h: 1.2, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+  });
+  caption(s, "Real console output (INFO level), log prefixes shortened and repeated lines cut. A full run is the same command without --rounds 3.");
+  s.addNotes("This is the system running. The command picks the attack, O to zero, with 10 percent malicious participants. The log shows the five poisoned participants; you can see participant 5 now holds 113 zeros and no O's, while honest participant 0 still has 45 O's. Each round five participants train, sometimes including an attacker, and the server reports accuracy. At the end the run writes its result files, which feed all our charts.");
+
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Demo and outputs" });
+  s.addText("Output: confidence of the top-1 class and the other 61", { placeholder: "title" });
+  await img(s, "e3_confidence.png", MX, 1.35, W - 2 * MX, 3.75, "Confidence bars for three models");
+  [["Clean model", "‘O’ #3196: 87% ‘O’, 9% ‘0’; the other 60 classes share under 4%. ‘A’ #3117: 96% ‘A’.", C.accent2],
+   ["After the ‘O’→‘0’ attack", "The same ‘O’ is now 76% ‘0’. Over all 299 test ‘O’s, mean confidence in ‘0’ rises from 26% to 81%: confidently wrong.", C.accent1],
+   ["After the ‘A’→‘h’ attack", "‘A’ #3117 is now 86% ‘h’. Over all 73 test ‘A’s, mean confidence in ‘h’ rises from 3% to 49%.", P2]].forEach(([h1, b, col], i) => {
+    const x = MX + i * 4.1;
+    s.addText([{ text: h1, options: { bold: true, fontSize: 15, color: col, breakLine: true } }, { text: b, options: { fontSize: 13 } }], { x, y: 5.2, w: 3.85, h: 1.25, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+  });
+  caption(s, "Softmax probabilities from demo.py. Colored bar = top-1 class; gray = next 4; last bar = the remaining 58 classes together.");
+  s.addNotes("For every image the model outputs a probability for all 62 classes. The clean model is 87 percent sure this O is an O, with most of the rest on zero. After the O-to-zero attack the same image is 76 percent zero. The attacked model does not become uncertain: it becomes confidently wrong, which is why confidence alone would not reveal the attack. The A-to-h attack does the same to A.");
+
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Demo and outputs" });
+  s.addText("Output statistics: accuracy, confidence and speed", { placeholder: "title" });
+  const hdrD = (t) => ({ text: t, options: { bold: true, color: C.background1, fill: { color: C.text1 } } });
+  s.addTable([[hdrD("Clean model, full FEMNIST test set"), hdrD("Value")], ["Top-1 accuracy (8,341 images)", "86.0%"], ["Mean top-1 confidence", "86.7%  (right 90.2%, wrong 64.9%)"], ["Mean mass on the other 61 classes", "13.3%"], ["Mean confidence in the true class", "80.3%"],
+    [hdrD("Speed, CPU only"), hdrD("Value")], ["Model size", "110,622 parameters (0.45 MB)"], ["Latency, 1 image, 1 thread", "0.36 ms median (p95 0.45 ms)"], ["Throughput, batch 64, 1 thread", "7,074 images/s"], ["Throughput, batch 512, 4 threads", "25,940 images/s"], ["One FL round (5 local epochs + test), 1 thread", "7.3 s"], ["Full run, 200 rounds, 1 thread", "24 min"]], { x: MX, y: 1.5, w: 6.25, colW: [3.35, 2.9], fontSize: 12, color: C.text1, border: { type: "solid", pt: 0.75, color: "DDE2EA" }, fill: { color: C.background1 }, rowH: 0.36, margin: [0.03, 0.08, 0.03, 0.08], objectName: "Output statistics table" });
+  await img(s, "term_demo.png", 7.0, 1.45, 5.73, 4.95, "demo.py console output");
+  caption(s, "Seed-3000 clean model at round 200. Speed measured with demo.py --benchmark on the project’s cloud machine: 4-core Intel Xeon 2.1 GHz, no GPU.");
+  s.addNotes("The output statistics. The clean model is right 86 percent of the time; when it is right it is 90 percent confident on average, when it is wrong 65 percent, so low confidence is a useful warning sign for honest mistakes. The network is tiny, 110 thousand parameters, so one prediction takes about a third of a millisecond on one CPU core and a batch reaches 7 to 26 thousand images per second. Training is the slow part: one federated round takes 7 seconds and a full 200-round run 24 minutes on one core.");
+
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Demo and outputs" });
+  s.addText("Three models on easy, hard and our own test data", { placeholder: "title" });
+  await img(s, "e4_comparison.png", MX, 1.35, W - 2 * MX, 3.6, "Model comparison chart");
+  [["Easy vs hard", "Clean model: 93% on easy classes vs 79% on look-alike classes.", C.text1],
+   ["Our font test set", "Printed characters, never seen in training: 60%. Even the clean model reads printed ‘O’ as ‘0’.", C.text1],
+   ["‘O’→‘0’ model", "−4 pts on hard, <1 on easy. ‘O’ recall 0% on both sets, yet slightly more confident.", C.accent1],
+   ["‘A’→‘h’ model", "‘A’ recall 93→27% on FEMNIST and 75→31% on fonts: the attack carries over to new data.", P2]].forEach(([h1, b, col], i) => {
+    const x = MX + i * 3.07;
+    s.addText([{ text: h1, options: { bold: true, fontSize: 15, color: col, breakLine: true } }, { text: b, options: { fontSize: 13 } }], { x, y: 5.1, w: 2.9, h: 1.35, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+  });
+  caption(s, "One final model per setting (seed 3000). Easy: 29 classes, 4,161 images. Hard: 33 look-alike classes (0/O/o, 1/I/l, 5/S/s, C/c …), 4,180 images. Fonts: 62 classes × 16 fonts × 2 sizes = 1,984 images.");
+  s.addNotes("We compared three models, clean and the two attacked ones, on three test sets. The easy and hard sets split FEMNIST's test set in advance by whether a class has a look-alike. The font set is our own: every character rendered from 16 computer fonts, in FEMNIST's format, so it is data the models have never seen. Overall accuracy and confidence barely separate the models. The difference is all in the attacked letter, and it carries over to our font set: the A-to-h model still turns printed A's into h's. Interestingly, the clean model already reads printed O as zero, because printed zeros and O's are much closer than handwritten ones.");
 
   // 15 limits
   pres.addSection({ title: "Limits and next steps" });
@@ -369,6 +519,48 @@ async function icon(Comp, color = "FFFFFF") {
     s.addText(body, { x: x + 0.95, y: y + 0.52, w: 5.0, h: 0.95, fontSize: 14, color: C.text1, valign: "top", margin: 0, isTextBox: true });
   });
   s.addNotes("In order of value: more runs to tighten the numbers, more pairs to test our pair-choice finding, then timing and defense. Longer term: realistic per-writer data and the full dataset.");
+
+  // NEW Contributions
+  pres.addSection({ title: "Contributions" });
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Contributions" });
+  s.addText("What we built on top of the open-source code", { placeholder: "title" });
+  const hdrE = (t) => ({ text: t, options: { bold: true, color: C.background1, fill: { color: C.text1 } } });
+  const rowsE = [[hdrE("Our addition"), hdrE("Files"), hdrE("Why it was needed")],
+    ["FEMNIST support: loader, 62-class CNN, generic label flip", "femnist.py, femnist_cnn.py, LabelFlip", "Original code only had CIFAR-10 / Fashion-MNIST, 10 classes"],
+    ["Bug fix: class list built from all participants", "poison_data.py", "Crashed when participant 0 lacked one of the 62 classes"],
+    ["Seeded, parallel, resumable experiment runner", "experiment_cli.py + 3 scripts, run_all.sh", "~60 runs of 25–35 min on 4 CPUs; paired clean/attacked runs"],
+    ["In-training update recorder, final-model saving, round timing", "server.py", "900 MB → 5 MB per run for the defense; demo and latency"],
+    ["Analysis: pair selection, per-class recall, tables, charts", "analyze.py, charts*.py", "Paper’s tables 2–3 and figures for our data"],
+    ["Automatic defense decision rule + scoring", "defense_eval.py", "Paper’s Algorithm 1 only produces a plot"],
+    ["New test data: easy/hard split + font-rendered set", "tools/make_test_sets.py", "Test models outside the FEMNIST distribution"],
+    ["Demo, confidence report, model comparison", "demo.py, compare_models.py", "Top-1 and remaining-class confidence, latency"]];
+  s.addTable(rowsE, { x: MX, y: 1.5, w: W - 2 * MX, colW: [4.6, 3.5, 4.03], fontSize: 12, color: C.text1, border: { type: "solid", pt: 0.75, color: "DDE2EA" }, fill: { color: C.background1 }, rowH: 0.47, margin: [0.03, 0.1, 0.03, 0.1], objectName: "Contributions table" });
+  caption(s, "1,590 lines added and 235 removed across 24 code files, from the unmodified upstream import (git diff 7ca82d3), plus chart scripts, ~60 training runs and the analysis.");
+  s.addNotes("Everything we added on top of the authors' code. The first block made it run on FEMNIST at all: a data loader, a 62-class network and a general attack, plus a bug fix. The second block made the experiments feasible on our hardware and comparable. Then the analysis, an automatic decision rule for the defense, and the new test sets, demo and model comparison.");
+
+  // NEW Acknowledgements
+  s = pres.addSlide({ masterName: "Content", sectionTitle: "Contributions" });
+  s.addText("Acknowledgements and download links", { placeholder: "title" });
+  const ack = [["Method and base code", [["Tolpegin, Truex, Gursoy, Liu. Data Poisoning Attacks Against Federated Learning Systems. ESORICS 2020.", "https://arxiv.org/abs/2007.08432"],
+      ["DataPoisoning_FL: FL simulator, clients, FedAvg, IID split, CNNs (commit 467eca0).", "https://github.com/git-disl/DataPoisoning_FL"]]],
+    ["Data", [["LEAF benchmark: FEMNIST preprocessing scripts (commit 09ec454). Caldas et al., arXiv:1812.01097.", "https://github.com/TalwalkarLab/leaf"],
+      ["NIST Special Database 19 (raw images; by_class.zip and by_write.zip).", "https://www.nist.gov/srd/nist-special-database-19"]]],
+    ["Libraries and models", [["PyTorch, NumPy, scikit-learn, Matplotlib, Pillow, loguru; slides built with PptxGenJS.", "https://pytorch.org"],
+      ["Pre-trained models: none. All models are trained from scratch in this project.", ""]]]];
+  let yA = 1.5;
+  ack.forEach(([head, items]) => {
+    s.addText(head, { x: MX, y: yA, w: W - 2 * MX, h: 0.38, fontSize: 16, bold: true, color: C.accent5, margin: 0, isTextBox: true });
+    yA += 0.42;
+    items.forEach(([t, url]) => {
+      const runs = [{ text: t + (url ? "  " : ""), options: {} }];
+      if (url) runs.push({ text: url, options: { hyperlink: { url }, color: C.accent5 } });
+      s.addText(runs, { x: MX + 0.2, y: yA, w: W - 2 * MX - 0.2, h: 0.5, fontSize: 13, color: C.text1, valign: "top", margin: 0, isTextBox: true });
+      yA += 0.52;
+    });
+    yA += 0.12;
+  });
+  caption(s, "Our code, results and slides: branch ccr-5a52ada9-2rytgh of the project repository.");
+  s.addNotes("The method and the base simulator come from Tolpegin and colleagues; the data from NIST via the LEAF benchmark. No pre-trained models were used.");
 
   // 17 conclusion
   pres.addSection({ title: "Conclusion" });

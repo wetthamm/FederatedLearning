@@ -1,0 +1,242 @@
+{
+ "clean (0% malicious)": {
+  "FEMNIST full test": {
+   "n": 8341,
+   "accuracy": 0.8598489389761419,
+   "top1_conf_mean": 0.8668655157089233,
+   "top1_conf_correct": 0.9024049043655396,
+   "top1_conf_wrong": 0.6488260626792908,
+   "rest_mass_mean": 0.13313446938991547,
+   "true_class_conf_mean": 0.8025723099708557,
+   "O->0": {
+    "n": 299,
+    "recall": 0.7725752508361204,
+    "to_target": 0.22073578595317725,
+    "conf_source": 0.690337598323822,
+    "conf_target": 0.2578112781047821
+   },
+   "A->h": {
+    "n": 73,
+    "recall": 0.9315068493150684,
+    "to_target": 0.0273972602739726,
+    "conf_source": 0.8263660073280334,
+    "conf_target": 0.025793740525841713
+   }
+  },
+  "FEMNIST easy": {
+   "n": 4161,
+   "accuracy": 0.9254986782023552,
+   "top1_conf_mean": 0.9236093759536743,
+   "top1_conf_correct": 0.9471431374549866,
+   "top1_conf_wrong": 0.6312588453292847,
+   "rest_mass_mean": 0.07639061659574509,
+   "true_class_conf_mean": 0.8872550129890442,
+   "A->h": {
+    "n": 73,
+    "recall": 0.9315068493150684,
+    "to_target": 0.0273972602739726,
+    "conf_source": 0.8263660073280334,
+    "conf_target": 0.025793740525841713
+   }
+  },
+  "FEMNIST hard": {
+   "n": 4180,
+   "accuracy": 0.7944976076555024,
+   "top1_conf_mean": 0.8103796243667603,
+   "top1_conf_correct": 0.850526750087738,
+   "top1_conf_wrong": 0.6551658511161804,
+   "rest_mass_mean": 0.18962039053440094,
+   "true_class_conf_mean": 0.7182746529579163,
+   "O->0": {
+    "n": 299,
+    "recall": 0.7725752508361204,
+    "to_target": 0.22073578595317725,
+    "conf_source": 0.690337598323822,
+    "conf_target": 0.2578112781047821
+   }
+  },
+  "Fonts (ours)": {
+   "n": 1984,
+   "accuracy": 0.5992943548387096,
+   "top1_conf_mean": 0.6803985238075256,
+   "top1_conf_correct": 0.7596871256828308,
+   "top1_conf_wrong": 0.5618146657943726,
+   "rest_mass_mean": 0.319601446390152,
+   "true_class_conf_mean": 0.5130493640899658,
+   "O->0": {
+    "n": 32,
+    "recall": 0.125,
+    "to_target": 0.875,
+    "conf_source": 0.2648415267467499,
+    "conf_target": 0.6600067615509033
+   },
+   "A->h": {
+    "n": 32,
+    "recall": 0.75,
+    "to_target": 0.0,
+    "conf_source": 0.6646473407745361,
+    "conf_target": 0.00721819419413805
+   }
+  }
+ },
+ "O\u21920 attack, 50% malicious": {
+  "FEMNIST full test": {
+   "n": 8341,
+   "accuracy": 0.838988130919554,
+   "top1_conf_mean": 0.8766598105430603,
+   "top1_conf_correct": 0.9131513237953186,
+   "top1_conf_wrong": 0.68651282787323,
+   "rest_mass_mean": 0.1233401745557785,
+   "true_class_conf_mean": 0.7939257621765137,
+   "O->0": {
+    "n": 299,
+    "recall": 0.0,
+    "to_target": 0.9933110367892977,
+    "conf_source": 0.13068504631519318,
+    "conf_target": 0.813469409942627
+   },
+   "A->h": {
+    "n": 73,
+    "recall": 0.9178082191780822,
+    "to_target": 0.0273972602739726,
+    "conf_source": 0.8376299738883972,
+    "conf_target": 0.01908722147345543
+   }
+  },
+  "FEMNIST easy": {
+   "n": 4161,
+   "accuracy": 0.9214131218457101,
+   "top1_conf_mean": 0.9250708818435669,
+   "top1_conf_correct": 0.95103919506073,
+   "top1_conf_wrong": 0.6205980181694031,
+   "rest_mass_mean": 0.07492917031049728,
+   "true_class_conf_mean": 0.888172447681427,
+   "A->h": {
+    "n": 73,
+    "recall": 0.9178082191780822,
+    "to_target": 0.0273972602739726,
+    "conf_source": 0.8376299738883972,
+    "conf_target": 0.01908722147345543
+   }
+  },
+  "FEMNIST hard": {
+   "n": 4180,
+   "accuracy": 0.7569377990430622,
+   "top1_conf_mean": 0.828468918800354,
+   "top1_conf_correct": 0.8672404289245605,
+   "top1_conf_wrong": 0.7077274322509766,
+   "rest_mass_mean": 0.17153115570545197,
+   "true_class_conf_mean": 0.7001073360443115,
+   "O->0": {
+    "n": 299,
+    "recall": 0.0,
+    "to_target": 0.9933110367892977,
+    "conf_source": 0.13068504631519318,
+    "conf_target": 0.813469409942627
+   }
+  },
+  "Fonts (ours)": {
+   "n": 1984,
+   "accuracy": 0.5861895161290323,
+   "top1_conf_mean": 0.6966689825057983,
+   "top1_conf_correct": 0.7749695777893066,
+   "top1_conf_wrong": 0.5857511758804321,
+   "rest_mass_mean": 0.30333101749420166,
+   "true_class_conf_mean": 0.5125154852867126,
+   "O->0": {
+    "n": 32,
+    "recall": 0.0,
+    "to_target": 1.0,
+    "conf_source": 0.032857246696949005,
+    "conf_target": 0.8795964121818542
+   },
+   "A->h": {
+    "n": 32,
+    "recall": 0.71875,
+    "to_target": 0.0,
+    "conf_source": 0.6449951529502869,
+    "conf_target": 0.010517035610973835
+   }
+  }
+ },
+ "A\u2192h attack, 50% malicious": {
+  "FEMNIST full test": {
+   "n": 8341,
+   "accuracy": 0.8536146744994605,
+   "top1_conf_mean": 0.8642784357070923,
+   "top1_conf_correct": 0.9019575119018555,
+   "top1_conf_wrong": 0.6445607542991638,
+   "rest_mass_mean": 0.13572156429290771,
+   "true_class_conf_mean": 0.7985182404518127,
+   "O->0": {
+    "n": 299,
+    "recall": 0.7290969899665551,
+    "to_target": 0.26421404682274247,
+    "conf_source": 0.6472933292388916,
+    "conf_target": 0.2963829040527344
+   },
+   "A->h": {
+    "n": 73,
+    "recall": 0.273972602739726,
+    "to_target": 0.6027397260273972,
+    "conf_source": 0.3286139667034149,
+    "conf_target": 0.4862399697303772
+   }
+  },
+  "FEMNIST easy": {
+   "n": 4161,
+   "accuracy": 0.9149242970439798,
+   "top1_conf_mean": 0.9199327826499939,
+   "top1_conf_correct": 0.9470469951629639,
+   "top1_conf_wrong": 0.6283398866653442,
+   "rest_mass_mean": 0.0800672397017479,
+   "true_class_conf_mean": 0.8793625831604004,
+   "A->h": {
+    "n": 73,
+    "recall": 0.273972602739726,
+    "to_target": 0.6027397260273972,
+    "conf_source": 0.3286139667034149,
+    "conf_target": 0.4862399697303772
+   }
+  },
+  "FEMNIST hard": {
+   "n": 4180,
+   "accuracy": 0.7925837320574163,
+   "top1_conf_mean": 0.8088771104812622,
+   "top1_conf_correct": 0.8501448035240173,
+   "top1_conf_wrong": 0.6511837840080261,
+   "rest_mass_mean": 0.19112291932106018,
+   "true_class_conf_mean": 0.7180413007736206,
+   "O->0": {
+    "n": 299,
+    "recall": 0.7290969899665551,
+    "to_target": 0.26421404682274247,
+    "conf_source": 0.6472933292388916,
+    "conf_target": 0.2963829040527344
+   }
+  },
+  "Fonts (ours)": {
+   "n": 1984,
+   "accuracy": 0.5821572580645161,
+   "top1_conf_mean": 0.6854458451271057,
+   "top1_conf_correct": 0.7671204805374146,
+   "top1_conf_wrong": 0.5716531276702881,
+   "rest_mass_mean": 0.3145540952682495,
+   "true_class_conf_mean": 0.5060628056526184,
+   "O->0": {
+    "n": 32,
+    "recall": 0.0,
+    "to_target": 1.0,
+    "conf_source": 0.14517292380332947,
+    "conf_target": 0.7621554136276245
+   },
+   "A->h": {
+    "n": 32,
+    "recall": 0.3125,
+    "to_target": 0.375,
+    "conf_source": 0.26209044456481934,
+    "conf_target": 0.3957984447479248
+   }
+  }
+ }
+}
