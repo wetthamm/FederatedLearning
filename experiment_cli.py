@@ -31,6 +31,8 @@ def base_parser(description):
                         help="record source-class output-node parameter deltas for the defense (Algorithm 1)")
     parser.add_argument("--record-all-classes", action="store_true",
                         help="with --record-deltas: record every class (for an unknown c_src); larger files")
+    parser.add_argument("--save-final-model", action="store_true",
+                        help="also save the final global model as <id>_final_model.pt (for demo.py)")
     parser.add_argument("--dataset", default=None, help="dataset profile (default: femnist)")
     return parser
 
@@ -78,7 +80,7 @@ def run_jobs(cli, jobs):
             continue
         job = dict(job)
         job.update(replacement_method=flip, num_rounds=cli.rounds, record_delta_classes=record,
-                   dataset=cli.dataset, threads=threads)
+                   dataset=cli.dataset, threads=threads, save_final_model=cli.save_final_model)
         full_jobs.append(job)
 
     print("Running {} experiment(s), {} in parallel, {} torch thread(s) each".format(len(full_jobs), cli.jobs, threads))

@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import time
 
 import numpy
 import torch
@@ -112,14 +113,18 @@ def run_machine_learning(clients, args, poisoned_workers, recorder=None):
     """
     epoch_test_set_results = []
     worker_selection = []
+    round_seconds = []
     for epoch in range(1, args.get_num_epochs() + 1):
+        t0 = time.perf_counter()
         results, workers_selected = train_subset_of_clients(epoch, args, clients, poisoned_workers, recorder)
+        round_seconds.append(time.perf_counter() - t0)
 
         epoch_test_set_results.append(results)
         worker_selection.append(workers_selected)
 
         logger.info("Round {}/{}: accuracy {:.2f}%", epoch, args.get_num_epochs(), results[0])
 
+    args.round_seconds = round_seconds
     return convert_results_to_csv(epoch_test_set_results), worker_selection
 
 def seed_everything(seed):
@@ -128,7 +133,8 @@ def seed_everything(seed):
     torch.manual_seed(seed)
 
 def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_strategy, idx,
-            output_dir=".", num_rounds=None, record_delta_classes=None, dataset=None, extra_info=None):
+            output_dir=".", num_rounds=None, record_delta_classes=None, dataset=None, extra_info=None,
+            save_final_model=False):
     """
     Run one federated learning experiment.
 
@@ -140,6 +146,7 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
         recorded for the defense (Algorithm 1); None disables recording.
     :param dataset: dataset profile name (default: arguments.DEFAULT_DATASET)
     :param extra_info: dict stored in the experiment's metadata json
+    :param save_final_model: also save the final global model (<id>_final_model.pt)
     """
     # Each repetition picks a different random set of malicious participants
     # and round selections, but is reproducible from its experiment id.
@@ -188,6 +195,8 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     numpy.save(prefix + "_final_confusion.npy", clients[0].last_confusion_matrix)
     if recorder is not None:
         recorder.save(prefix + "_deltas.npz", poisoned_workers)
+    if save_final_model:
+        torch.save(clients[0].get_nn_parameters(), prefix + "_final_model.pt")
 
     metadata = {
         "experiment_id": idx,
@@ -202,6 +211,7 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
         "selection_kwargs": {k: v for k, v in KWARGS.items() if k != "current_epoch_number"},
         "num_rounds": args.get_num_epochs(),
         "num_classes": args.get_num_classes(),
+        "round_seconds": [round(x, 3) for x in getattr(args, "round_seconds", [])],
     }
     if extra_info:
         metadata.update(extra_info)
