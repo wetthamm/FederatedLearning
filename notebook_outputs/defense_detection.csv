@@ -1,0 +1,21 @@
+pair,malicious %,window,silhouette,acted,attackers caught,honest flagged
+O->0,0,rounds 10-200,0.57,False,0/0,0
+O->0,0,rounds 10-50,0.588,False,0/0,0
+O->0,2,rounds 10-200,0.505,False,0/1,0
+O->0,2,rounds 10-50,0.558,False,0/1,0
+O->0,4,rounds 10-200,0.536,False,0/2,0
+O->0,4,rounds 10-50,0.521,False,0/2,0
+O->0,10,rounds 10-200,0.691,True,5/5,3
+O->0,10,rounds 10-50,0.719,True,5/5,2
+O->0,20,rounds 10-200,0.79,True,10/10,0
+O->0,20,rounds 10-50,0.757,True,10/10,1
+A->h,0,rounds 10-200,0.54,False,0/0,0
+A->h,0,rounds 10-50,0.546,False,0/0,0
+A->h,2,rounds 10-200,0.8,True,1/1,1
+A->h,2,rounds 10-50,0.812,True,1/1,0
+A->h,4,rounds 10-200,0.828,True,2/2,1
+A->h,4,rounds 10-50,0.8,True,2/2,1
+A->h,10,rounds 10-200,0.815,True,5/5,1
+A->h,10,rounds 10-50,0.817,True,5/5,0
+A->h,20,rounds 10-200,0.803,True,10/10,0
+A->h,20,rounds 10-50,0.794,True,10/10,1
